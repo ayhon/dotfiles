@@ -1,0 +1,191 @@
+"" [[FROM /etc/vim/vimrc]]
+" All system-wide defaults are set in $VIMRUNTIME/archlinux.vim (usually just
+" /usr/share/vim/vimfiles/archlinux.vim) and sourced by the call to :runtime
+" you can find below.  If you wish to change any of those settings, you should
+" do it in this file (/etc/vimrc), since archlinux.vim will be overwritten
+" everytime an upgrade of the vim packages is performed.  It is recommended to
+" make changes after sourcing archlinux.vim since it alters the value of the
+" 'compatible' option.
+
+" This line should not be removed as it ensures that various options are
+" properly set to work with the Vim-related packages.
+runtime! archlinux.vim
+
+" If you prefer the old-style vim functionalty, add 'runtime! vimrc_example.vim'
+" Or better yet, read /usr/share/vim/vim80/vimrc_example.vim or the vim manual
+" and configure vim to your own liking!
+
+" do not load defaults if ~/.vimrc is missing
+"let skip_defaults_vim=1
+
+"" [[FROM /usr/share/vim/archlinux.vim]] {{{
+if &compatible
+  set nocompatible
+endif
+
+set backspace=indent,eol,start
+set ruler " See coordinates
+set suffixes+=.aux,.bbl,.blg,.brf,.cb,.dvi,.idx,.ilg,.ind,.inx,.jpg,.log,.out,.png,.toc
+set suffixes-=.h
+set suffixes-=.obj
+" }}}
+
+" Move temporary files to a secure location to protect against CVE-2017-1000382 {{{
+if exists('$XDG_CACHE_HOME')
+  let &g:directory=$XDG_CACHE_HOME
+else
+  let &g:directory=$HOME . '/.cache'
+endif
+let &g:undodir=&g:directory . '/vim/undo//'
+let &g:backupdir=&g:directory . '/vim/backup//'
+let &g:directory.='/vim/swap//'
+"}}}
+
+" Create directories if they doesn't exist {{{
+if ! isdirectory(expand(&g:directory))
+  silent! call mkdir(expand(&g:directory), 'p', 0700)
+endif
+if ! isdirectory(expand(&g:backupdir))
+  silent! call mkdir(expand(&g:backupdir), 'p', 0700)
+endif
+if ! isdirectory(expand(&g:undodir))
+  silent! call mkdir(expand(&g:undodir), 'p', 0700)
+endif
+" }}}
+
+" Make shift-insert work like in Xterm {{{
+if has('gui_running')
+  map <S-Insert> <MiddleMouse>
+  map! <S-Insert> <MiddleMouse>
+endif
+" }}}
+
+"" [[ADDED CONFIG LINES]] {{{
+syntax on
+
+"" vim-plug section begins {{{
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+call plug#begin('~/.vim/plugged')
+"Plug 'junegunn/goyo.vim'
+Plug 'flazz/vim-colorschemes'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q
+Plug 'tpope/vim-commentary'
+Plug 'itchyny/lightline.vim'
+Plug 'leafgarland/typescript-vim'
+Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
+"Plug 'lervag/vimtex'
+"Plug 'sirver/ultisnips'
+"Plug 'xuhdev/vim-latex-live-preview'
+"Plug 'vim/killersheep'
+Plug 'ap/vim-css-color'
+"Plug 'ycm-core/YouCompleteMe'
+call plug#end()
+"" vim-plug section ends }}}
+
+"" ultisnips section begins {{{
+let g:UltiSnipsExpandTrigger='<tab>'
+let g:UltiSnipsJumpForwardTrigger='<tab>'
+let g:UltiSnipsJumpBackwardTrigger='<s-tab>'
+let g:UltiSnipsEditSplit="horizontal"
+"" ultisnips section ends }}}
+
+"" vimtex section begins {{{
+let g:livepreview_previewer = "zathura"
+let g:tex_flavour='latex'
+let g:vimtex_view_method='zathura'
+let g:vimtex_quickfix_mode=0
+set conceallevel=1
+let g:tex_conceal='abdmg'
+"" vimtex section ends }}}
+
+"" vim-pad section begins {{{
+"let g:pad#dir = "~/Desktop/notes"
+"let g:pad#local_dir = "notes"
+"" vim-pad section ends }}}
+
+"" netrw (file explorer in vim) section begins {{{
+let g:netrw_liststyle = 3
+"" netrw section ends }}}
+
+"" lightline {{{
+let g:lightline = {
+			\ 'colorscheme': 'jellybeans'
+			\}
+
+set laststatus=2 "status bar is shown even when in only one buffer
+set noshowmode "Not needed with lightline.vim
+"" }}}
+
+"" setting options begins {{{
+colorscheme jellybeans
+set mouse=a "enable mouse
+set nu rnu "set hybrid numbers
+set noerrorbells "disable beep on errors
+set wildmenu "display command line's tab complete options as menu
+set incsearch "search the word as its written
+set hlsearch "highlight the words matched by pattern
+set ignorecase "ignore case when searching
+set smartcase "not ignore case if typing in capital case
+set encoding=utf-8 "use encoding that supports unicode
+set undodir=$HOME/.vim/undodir "tell vim where to store undo history
+set undofile "mantain undo history between sessions (In undodir ↑)
+set updatetime=750
+set tabstop=4
+set shiftwidth=4
+set modeline
+set makeprg=make\ \-s
+"set expandtab
+"" setting options ends }}}
+
+"" mappings {{{
+" Sensible mapping
+let mapleader=" "
+nmap Y y$
+" Y grabs the whole line, not expected behaviour
+imap <C-c> <Esc>
+" <C-c> isn't detected by InsertLeave
+
+" Set normal mode mappings
+nnoremap <Leader>w :w<CR>
+nnoremap <Leader>q :q<CR>
+nnoremap <Leader>! :q!<CR>
+nnoremap <leader>H :set rnu! nu!<CR>
+nnoremap <leader>s :set spell!<CR>
+nnoremap <leader>t :term<CR><C-W>J<C-W>5_ python && exit<CR><C-L>
+
+" PV: Tip 81
+nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
+
+nnoremap <C-N> :bnext<CR>
+nnoremap <C-M> :bprev<CR>
+
+" Set visual mode mappings
+xnoremap <leader>f :fold<CR>
+"" }}}
+
+"" autocmd {{{
+autocmd FileType cpp nnoremap <leader>c :w<CR>:!clear && g++ -g -o %< % && ./%< <CR>
+autocmd FileType cpp nnoremap <leader>/ ^i//<C-C>j
+
+" Switching between relative and nonrelative numbers between insert and normal
+" mode
+autocmd InsertEnter * :setlocal norelativenumber
+autocmd InsertLeave * :setlocal relativenumber
+
+" Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
+autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
+" Syntax highlighting in .rasi files
+autocmd BufNewFile,BufRead /*.rasi setf css
+
+" Remove trailing whitespaces
+autocmd BufWritePre * :%s/\s\+$//e
+"" }}
+
+"" }}}
+
+" vim: set foldmethod=marker:
