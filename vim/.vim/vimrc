@@ -70,7 +70,7 @@ if empty(glob('~/.vim/autoload/plug.vim'))
     autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 call plug#begin('~/.vim/plugged')
-"Plug 'junegunn/goyo.vim'
+Plug 'junegunn/goyo.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q
@@ -79,13 +79,19 @@ Plug 'itchyny/lightline.vim'
 Plug 'leafgarland/typescript-vim'
 Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
 "Plug 'lervag/vimtex'
-"Plug 'sirver/ultisnips'
+Plug 'sirver/ultisnips'
 "Plug 'xuhdev/vim-latex-live-preview'
 "Plug 'vim/killersheep'
 Plug 'ap/vim-css-color'
 "Plug 'ycm-core/YouCompleteMe'
+Plug 'mattn/emmet-vim'
 call plug#end()
 "" vim-plug section ends }}}
+
+" goyo section begins {{{
+" autocmd! User GoyoEnter set nornu nonu
+" Not enough, disable the mixed rnu nu autogroup
+" goyo section ends}}}
 
 "" ultisnips section begins {{{
 let g:UltiSnipsExpandTrigger='<tab>'
@@ -174,8 +180,11 @@ autocmd FileType cpp nnoremap <leader>/ ^i//<C-C>j
 
 " Switching between relative and nonrelative numbers between insert and normal
 " mode
-autocmd InsertEnter * :setlocal norelativenumber
-autocmd InsertLeave * :setlocal relativenumber
+augroup modalHybridNumbers
+	autocmd!
+	autocmd InsertEnter * :setlocal norelativenumber
+	autocmd InsertLeave * :setlocal relativenumber
+augroup END
 
 " Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
 autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
