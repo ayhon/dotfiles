@@ -71,6 +71,8 @@ if empty(glob('~/.vim/autoload/plug.vim'))
 endif
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/goyo.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim' 			"Enable better multi file switching
 Plug 'flazz/vim-colorschemes'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q
@@ -87,6 +89,17 @@ Plug 'ap/vim-css-color'
 Plug 'mattn/emmet-vim'
 call plug#end()
 "" vim-plug section ends }}}
+
+" ale section begins{{{
+let g:ale_linters = {
+      \  'cs':['syntax', 'semantic', 'issues'],
+      \  'python': ['pylint'],
+      \  'java': ['eclipselsp']
+      \ }
+let g:ale_fixers = {
+	  \  'java': ['google_java_format'],
+	  \ }
+" ale section ends }}}
 
 " goyo section begins {{{
 " goyo section ends}}}
@@ -141,8 +154,10 @@ set undofile "mantain undo history between sessions (In undodir ↑)
 set updatetime=750
 set tabstop=4
 set shiftwidth=4
-set modeline
+set modeline "check last line of a file for extra settings
 set makeprg=make\ \-s
+set splitbelow "better window splitting
+set splitright "better window splitting
 "set expandtab
 "" setting options ends }}}
 
