@@ -190,7 +190,6 @@ inoremap <C-ñ> :!yad --color \| xclip -sel clip<CR><C-r>+
 nnoremap <leader>fh :Helptags<CR>
 nnoremap <leader>ff :Files<CR>
 nnoremap <leader>fcs :Colors<CR>
-
 " }}}
 "" }}}
 
