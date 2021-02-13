@@ -1,35 +1,34 @@
-"" [[FROM /etc/vim/vimrc]]
-" All system-wide defaults are set in $VIMRUNTIME/archlinux.vim (usually just
-" /usr/share/vim/vimfiles/archlinux.vim) and sourced by the call to :runtime
-" you can find below.  If you wish to change any of those settings, you should
-" do it in this file (/etc/vimrc), since archlinux.vim will be overwritten
-" everytime an upgrade of the vim packages is performed.  It is recommended to
-" make changes after sourcing archlinux.vim since it alters the value of the
-" 'compatible' option.
-
-" This line should not be removed as it ensures that various options are
-" properly set to work with the Vim-related packages.
-runtime! archlinux.vim
-
-" If you prefer the old-style vim functionalty, add 'runtime! vimrc_example.vim'
-" Or better yet, read /usr/share/vim/vim80/vimrc_example.vim or the vim manual
-" and configure vim to your own liking!
-
-" do not load defaults if ~/.vimrc is missing
-"let skip_defaults_vim=1
-
-"" [[FROM /usr/share/vim/archlinux.vim]] {{{
+" Base settings {{{
+" Sensible defaults {{{
 if &compatible
   set nocompatible
 endif
 
+syntax enable
+filetype plugin indent on
+
+" From sensible.vim by tpope {{{
 set backspace=indent,eol,start
 set ruler " See coordinates
-set suffixes+=.aux,.bbl,.blg,.brf,.cb,.dvi,.idx,.ilg,.ind,.inx,.jpg,.log,.out,.png,.toc
-set suffixes-=.h
-set suffixes-=.obj
-" }}}
+set listchars=tab:>\ ,trail:-,extends:→,precedes:←,nbsp:+
+set autoread
 
+
+" Allow color schemes to do bright colors without forcing bold.
+if &t_Co == 8 && $TERM !~# '^Eterm'
+	set t_Co=16
+endif
+"}}}
+
+let mapleader=" "
+nmap Y y$
+imap <C-c> <Esc>
+" <C-c> is not detected by InsertLeave
+
+set suffixes+=.aux,.bbl,.blg,.brf,.cb,.dvi,.idx,.ilg,.ind,.inx,.jpg,.log,.out,.png,.toc
+set suffixes-=.h,.class
+set suffixes-=.obj
+"}}}
 " Move temporary files to a secure location to protect against CVE-2017-1000382 {{{
 if exists('$XDG_CACHE_HOME')
   let &g:directory=$XDG_CACHE_HOME
@@ -40,7 +39,6 @@ let &g:undodir=&g:directory . '/vim/undo//'
 let &g:backupdir=&g:directory . '/vim/backup//'
 let &g:directory.='/vim/swap//'
 "}}}
-
 " Create directories if they doesn't exist {{{
 if ! isdirectory(expand(&g:directory))
   silent! call mkdir(expand(&g:directory), 'p', 0700)
@@ -51,104 +49,101 @@ endif
 if ! isdirectory(expand(&g:undodir))
   silent! call mkdir(expand(&g:undodir), 'p', 0700)
 endif
-" }}}
-
-" Make shift-insert work like in Xterm {{{
-if has('gui_running')
-  map <S-Insert> <MiddleMouse>
-  map! <S-Insert> <MiddleMouse>
-endif
-" }}}
-
-"" [[ADDED CONFIG LINES]] {{{
-syntax on
-
-"" vim-plug section begins {{{
+"}}}
+"}}}
+" Specific settings {{{
+" Plugins {{{
+" vim-plug {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
       \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
+
 call plug#begin('~/.vim/plugged')
-Plug 'junegunn/goyo.vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim' 			"Enable better multi file switching
-Plug 'flazz/vim-colorschemes'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q
+Plug 'junegunn/fzf.vim'	"Enable better multi file switching
 Plug 'tpope/vim-commentary'
+Plug 'flazz/vim-colorschemes'
 Plug 'itchyny/lightline.vim'
-Plug 'leafgarland/typescript-vim'
 Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
+"Plug 'junegunn/goyo.vim'
+"Plug 'tpope/vim-surround'
+"Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
 Plug 'lervag/vimtex' , {'do': 'notify-send \"Dependencies\" \"Install latexmk\"',}
 Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
-"Plug 'xuhdev/vim-latex-live-preview'
 "Plug 'vim/killersheep'
-Plug 'ap/vim-css-color'
 "Plug 'ycm-core/YouCompleteMe'
+Plug 'ap/vim-css-color'
 Plug 'mattn/emmet-vim'
+"Plug 'leafgarland/typescript-vim'
+"Plug 'HerringtonDarkholme/yats.vim'
 call plug#end()
-"" vim-plug section ends }}}
-
-" ale section begins{{{
+"}}}
+" fzf {{{
+let g:fzf_colors =
+	\ { 'fg':      ['fg', 'Normal'],
+	  \ 'bg':      ['bg', 'Normal'],
+	  \ 'hl':      ['fg', 'Comment'],
+	  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+	  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+	  \ 'hl+':     ['fg', 'Statement'],
+	  \ 'info':    ['fg', 'PreProc'],
+	  \ 'border':  ['fg', 'Ignore'],
+	  \ 'prompt':  ['fg', 'Conditional'],
+	  \ 'pointer': ['fg', 'Exception'],
+	  \ 'marker':  ['fg', 'Keyword'],
+	  \ 'spinner': ['fg', 'Label'],
+	  \ 'header':  ['fg', 'Comment'] } " Integrate fzf with current colorscheme
+"}}}
+" ale {{{
 let g:ale_linters = {
       \  'cs':['syntax', 'semantic', 'issues'],
       \  'python': ['pylint'],
-      \  'java': ['eclipselsp']
       \ }
+" \  'java' : ['eslint'],
 let g:ale_fixers = {
 	  \  'java': ['google_java_format'],
 	  \ }
-" ale section ends }}}
-
-" goyo section begins {{{
-" goyo section ends}}}
-
-"" ultisnips section begins {{{
+"}}}
+" ultisnips {{{
 let g:UltiSnipsExpandTrigger='<tab>'
 let g:UltiSnipsJumpForwardTrigger='<tab>'
 let g:UltiSnipsJumpBackwardTrigger='<s-tab>'
 let g:UltiSnipsEditSplit="horizontal"
-"" ultisnips section ends }}}
-
-"" vimtex section begins {{{
+"}}}
+" vimtex {{{
 let g:tex_flavor='latex'
 let g:vimtex_view_method='zathura'
 let g:vimtex_quickfix_mode=0
 set conceallevel=1
 let g:tex_conceal='abdmg'
 "let g:livepreview_previewer = "zathura"
-"" vimtex section ends }}}
-
-"" vim-pad section begins {{{
-"let g:pad#dir = "~/Desktop/notes"
-"let g:pad#local_dir = "notes"
-"" vim-pad section ends }}}
-
-"" netrw (file explorer in vim) section begins {{{
+"}}}
+" netrw (file explorer in vim) {{{
 let g:netrw_liststyle = 3
-"" netrw section ends }}}
-
-"" lightline section begins {{{
+"}}}
+" lightline {{{
+set noshowmode "showmode substituted by lightline.vim
 let g:lightline = {
 			\ 'colorscheme': 'jellybeans'
 			\}
-
-set laststatus=2 "status bar is shown even when in only one buffer
-set noshowmode "Not needed with lightline.vim
-"" }}}
-
-"" setting options begins {{{
+"}}}
+"}}}
+" Vim settings {{{
+" Interface{{{
 colorscheme jellybeans
-set mouse=a "enable mouse
-set nu rnu "set hybrid numbers
+set number relativenumber "set hybrid numbers
+set laststatus=2 "status bar is shown even when in only one buffer
 set noerrorbells "disable beep on errors
 set wildmenu "display command line's tab complete options as menu
 set incsearch "search the word as its written
 set hlsearch "highlight the words matched by pattern
+"}}}
+" Behaviour {{{
+set encoding=utf-8 "use encoding that supports unicode
 set ignorecase "ignore case when searching
 set smartcase "not ignore case if typing in capital case
-set encoding=utf-8 "use encoding that supports unicode
 set undodir=$HOME/.vim/undodir "tell vim where to store undo history
 set undofile "mantain undo history between sessions (In undodir ↑)
 set updatetime=750
@@ -158,47 +153,45 @@ set modeline "check last line of a file for extra settings
 set makeprg=make\ \-s
 set splitbelow "better window splitting
 set splitright "better window splitting
-"set expandtab
-"" setting options ends }}}
-
-"" mappings {{{
-" Sensible mapping
-let mapleader=" "
-nmap Y y$
-" Y grabs the whole line, not expected behaviour
-imap <C-c> <Esc>
-" <C-c> isn't detected by InsertLeave
-
+set smarttab
+set nrformats-=octal
+set mouse=a "enable mouse
+"}}}
+"}}}
+" Mappings {{{
 " Set normal mode mappings
 nnoremap <Leader>w :w<CR>
-nnoremap <Leader>q :q<CR>
+nnoremap <Leader>q :qall<CR>
 nnoremap <Leader>! :q!<CR>
-nnoremap <leader>H :set rnu! nu!<CR>
+" nnoremap <leader>H :set rnu! nu!<CR>
 nnoremap <leader>s :set spell!<CR>
 nnoremap <leader>t :term<CR><C-W>J<C-W>5_ python && exit<CR><C-L>
 
-" PV: Tip 81
 nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
+"  Practical Vim's ↑ (Tip 81)
+"nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+"  tpope's ↑
 
+" Movement {{{
 nnoremap <C-N> :bnext<CR>
 nnoremap <C-M> :bprev<CR>
+" TODO: Alt-hjkl for windows
+"}}}
 
-" Choose color and paste into file
-inoremap <C-ñ> :!yad --color \| xclip -sel clip<CR><C-r>+
+" Quick google lookup
+nnoremap <leader>gg :silent !firefox -P devlookup -private -search "" &<Left><Left><Left>
 
 " Fuzzy mappings{{{
 nnoremap <leader>fh :Helptags<CR>
 nnoremap <leader>ff :Files<CR>
-nnoremap <leader>fcs :Colors<CR>
-" }}}
-"" }}}
-
-"" autocmd {{{
+nnoremap <leader>fc :Colors<CR>
+"}}}
+"}}}
+" Autocommands {{{
+" TODO: augroup's
 autocmd FileType cpp nnoremap <leader>c :w<CR>:!clear && g++ -g -o %< % && ./%< <CR>
-autocmd FileType cpp nnoremap <leader>/ ^i//<C-C>j
 
-" Switching between relative and nonrelative numbers between insert and normal
-" mode
+" Switching between relative and nonrelative numbers between insert and normal mode
 augroup modalHybridNumbers
 	autocmd!
 	autocmd InsertEnter * :setlocal norelativenumber
@@ -207,13 +200,12 @@ augroup END
 
 " Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
 autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
-" Syntax highlighting in .rasi files
+
+" Syntax highlighting in .rasi files (Rofi theme files)
 autocmd BufNewFile,BufRead /*.rasi setf css
 
 " Remove trailing whitespaces
-autocmd BufWritePre * :%s/\s\+$//e
-"" }}
-
-"" }}}
-
+" autocmd BufWritePre * :%s/\s\+$//e
+"}}}
+"}}}
 " vim: set foldmethod=marker:
