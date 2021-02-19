@@ -1,3 +1,7 @@
+"       ▗               ▗▀▖▗    
+"    ▌ ▌▄ ▛▚▀▖ ▞▀▖▞▀▖▛▀▖▐  ▄ ▞▀▌
+"    ▐▐ ▐ ▌▐ ▌ ▌ ▖▌ ▌▌ ▌▜▀ ▐ ▚▄▌
+"     ▘ ▀▘▘▝ ▘ ▝▀ ▝▀ ▘ ▘▐  ▀▘▗▄▘
 " Base settings {{{
 " Sensible defaults {{{
 if &compatible
@@ -100,11 +104,12 @@ let g:fzf_colors =
 let g:ale_linters = {
       \  'cs':['syntax', 'semantic', 'issues'],
       \  'python': ['pylint'],
+      \  'java': ['eclipselsp'],
       \ }
 " \  'java' : ['eslint'],
 let g:ale_fixers = {
-	  \  'java': ['google_java_format'],
-	  \ }
+      \  'java': ['google_java_format'],
+      \ }
 "}}}
 " ultisnips {{{
 let g:UltiSnipsExpandTrigger='<tab>'
