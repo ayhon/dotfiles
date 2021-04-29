@@ -1,7 +1,3 @@
-"       ▗               ▗▀▖▗    
-"    ▌ ▌▄ ▛▚▀▖ ▞▀▖▞▀▖▛▀▖▐  ▄ ▞▀▌
-"    ▐▐ ▐ ▌▐ ▌ ▌ ▖▌ ▌▌ ▌▜▀ ▐ ▚▄▌
-"     ▘ ▀▘▘▝ ▘ ▝▀ ▝▀ ▘ ▘▐  ▀▘▗▄▘
 " Base settings {{{
 " Sensible defaults {{{
 if &compatible
@@ -74,16 +70,21 @@ Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
 "Plug 'junegunn/goyo.vim'
 "Plug 'tpope/vim-surround'
 "Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
-Plug 'lervag/vimtex' , {'do': 'notify-send \"Dependencies\" \"Install latexmk\"',}
-Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
+Plug 'lervag/vimtex' ", {'do': 'notify-send \"Dependencies\" \"Install latexmk\"',}
+" Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
 "Plug 'vim/killersheep'
 "Plug 'ycm-core/YouCompleteMe'
 Plug 'ap/vim-css-color'
 Plug 'mattn/emmet-vim'
 "Plug 'leafgarland/typescript-vim'
 "Plug 'HerringtonDarkholme/yats.vim'
+Plug 'scrooloose/vim-slumlord'
+Plug 'aklt/plantuml-syntax'
+Plug 'davisdude/vim-love-docs', {'do': './gen.sh'}
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 call plug#end()
 "}}}
+" Plugin settings {{{
 " fzf {{{
 let g:fzf_colors =
 	\ { 'fg':      ['fg', 'Normal'],
@@ -107,9 +108,10 @@ let g:ale_linters = {
       \  'java': ['eclipselsp'],
       \ }
 " \  'java' : ['eslint'],
-let g:ale_fixers = {
-      \  'java': ['google_java_format'],
-      \ }
+let g:ale_fixers = [
+	  \  'google_java_format',
+      \  'astyle',
+      \ ]
 "}}}
 " ultisnips {{{
 let g:UltiSnipsExpandTrigger='<tab>'
@@ -131,19 +133,24 @@ let g:netrw_liststyle = 3
 " lightline {{{
 set noshowmode "showmode substituted by lightline.vim
 let g:lightline = {
-			\ 'colorscheme': 'jellybeans'
+			\ 'colorscheme': 'ayu_dark'
 			\}
+"}}}
+" vim-love-docs{{{
+let g:lovedocs_colors = 'guifg=#E2BE6E ctermfg=159' "https://jonasjacek.github.io/colors/
+"}}}
 "}}}
 "}}}
 " Vim settings {{{
 " Interface{{{
-colorscheme jellybeans
+colorscheme ayu
 set number relativenumber "set hybrid numbers
 set laststatus=2 "status bar is shown even when in only one buffer
 set noerrorbells "disable beep on errors
 set wildmenu "display command line's tab complete options as menu
 set incsearch "search the word as its written
 set hlsearch "highlight the words matched by pattern
+set termguicolors "enables true color in terminal. Uses cterm values
 "}}}
 " Behaviour {{{
 set encoding=utf-8 "use encoding that supports unicode
@@ -199,6 +206,7 @@ autocmd FileType cpp nnoremap <leader>c :w<CR>:!clear && g++ -g -o %< % && ./%< 
 " Switching between relative and nonrelative numbers between insert and normal mode
 augroup modalHybridNumbers
 	autocmd!
+
 	autocmd InsertEnter * :setlocal norelativenumber
 	autocmd InsertLeave * :setlocal relativenumber
 augroup END
@@ -213,4 +221,8 @@ autocmd BufNewFile,BufRead /*.rasi setf css
 " autocmd BufWritePre * :%s/\s\+$//e
 "}}}
 "}}}
+"       ▗               ▗▀▖▗    
+"    ▌ ▌▄ ▛▚▀▖ ▞▀▖▞▀▖▛▀▖▐  ▄ ▞▀▌
+"    ▐▐ ▐ ▌▐ ▌ ▌ ▖▌ ▌▌ ▌▜▀ ▐ ▚▄▌
+"     ▘ ▀▘▘▝ ▘ ▝▀ ▝▀ ▘ ▘▐  ▀▘▗▄▘
 " vim: set foldmethod=marker:

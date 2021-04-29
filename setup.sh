@@ -4,6 +4,9 @@
 GIT_DIR="$HOME/git"
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
+BASIC_PKGS="tmux nvim git unrar mpv pandoc tldr gdb feh"
+EXTRA_PKGS="obs glimpse yad flameshot translate-shell ranger rofi"
+
 # Function definition
 dependencies(){
 	missing_dep=""
@@ -11,7 +14,7 @@ dependencies(){
 		which $dep > /dev/null 2>&1 || missing_dep="$missing_dep $dep"
 	done
 	if [ -n "$missing_dep" ]; then 
-		print_err "Missing dependencies:$missing_dep"
+		# print_err "Missing dependencies:$missing_dep"
 		inst $missing_dep
 	fi
 }
@@ -30,9 +33,11 @@ inst(){
 	#elif [[ "$OSTYPE" == "cygwin" ]]; then
 	if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 		ensure_root
-		distro_id="$(head -1 /etc/*-release | grep NAME | sed 's/NAME=//g')"
-		case distro_id in
-			"Pop!_OS" | "Ubuntu")
+		distro_id="$(head -n1 /etc/*-release | grep NAME)"
+		distro_id="$(echo $distro_id | sed -s "s/NAME=//g;s/\!//g;s/\"//g")"
+		echo $distro_id
+		case $distro_id in
+			"Pop_OS" | "Ubuntu")
 				sudo apt update && sudo apt upgrade
 				sudo apt install "$@"
 				;;
@@ -69,6 +74,9 @@ setup(){
 					"bash")
 						rc_shell="$HOME/.bashrc"
 						;;
+					*)
+						print_error "Couldn't recognize shell"
+						;;
 				esac
 				echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> $rc_shell
 			fi
@@ -78,15 +86,19 @@ setup(){
 			;;
 		"vim")
 			stow -Sd ~/git/dotfiles/ -t ~ vim
+			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+				    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 			;;
 		"nvim")
 			stow -Sd ~/git/dotfiles/ -t ~ nvim
+			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \ || curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim \ 
+				--create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 			;;
 		"basic")
-			dependencies tmux nvim git
+			dependencies "$BASIC_PKGS"
 			;;
 		"extra")
-			dependencies obs-studio gimp yad flameshot
+			dependencies "$EXTRA_PKGS"
 			;;
 		"test")
 			ensure_root
