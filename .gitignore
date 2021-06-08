@@ -1,3 +1,5 @@
 /vim/.vim/plugged
-/vim/.netrwhist
+**/.netrwhist
 /vim/.vim/autoload
+/vim/.vim/undodir
+nvim/.config/nvim/spell/
