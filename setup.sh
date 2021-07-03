@@ -3,7 +3,6 @@
 
 GIT_DIR="$HOME/git"
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-SCRIPT_NAME="$(basename $0)"
 DOTFILES_DIR="$GIT_DIR/dotfiles"
 CMD_NAME="setup"
 
@@ -116,13 +115,13 @@ setup(){
 			fi
 
 			# Make sure this script is executable
-			if [ ! -x "$SCRIPT_DIR/$SCRIPT_NAME" ]; then
-				chmod +x "$SCRIPT_DIR/$SCRIPT_NAME"
+			if [ ! -x "$DOTFILES_DIR/setup.sh"]; then
+				chmod +x "$DOTFILES_DIR/setup.sh"
 			fi
 
 			# Make sure this script is found in path
 			if [ ! -L "$HOME/.bin/$CMD_NAME" ];then
-				ln -s "$SCRIPT_DIR/$SCRIPT_NAME" "$HOME/.bin/$CMD_NAME"
+				ln -s "$DOTFILES_DIR/setup.sh" "$HOME/.bin/$CMD_NAME"
 			fi
 			;;
 
