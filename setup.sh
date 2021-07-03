@@ -43,7 +43,7 @@ ensure_root(){
 }
 inst(){
 	# System agnostic installer
-	goal_msg "Installing $@"
+	goal_msg "Installing" $@
 
 	#elif [[ "$OSTYPE" == "darwin" ]]; then
 	#elif [[ "$OSTYPE" == "cygwin" ]]; then
@@ -88,6 +88,7 @@ setup(){
 			#-# Things I need for this script to work #-#
 
 			# Make sure my `dotfiles` repo was clonned locally
+			goal_msg "Cloning dotfiles repo locally from github"
 			if [ ! -d "$DOTFILES_DIR" ]; then
 				mkdir -p "$GIT_DIR" 
 				cd  "$GIT_DIR"
@@ -96,7 +97,7 @@ setup(){
 					git clone "https://github.com/ayhon/dotfiles"
 			fi
 
-			# Make a `.bin` directory to store my scripts.
+			goal_msg "Making a .bin directory to store script"
 			# Also, add it to my PATH
 			if [ ! -d "$HOME/.bin" ]; then
 				mkdir "$HOME/.bin"
@@ -115,17 +116,19 @@ setup(){
 				echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> $rc_shell
 			fi
 
-			# Make sure this script is executable
+			goal_msg "Making sure $CMD_NAME is executable" 
 			if [ ! -x "$DOTFILES_DIR/setup.sh" ]; then
 				chmod +x "$DOTFILES_DIR/setup.sh"
 			fi
 
 			# Make sure this script is found in path
+			goal_msg "Making sure this script if reachable by PATH"
 			if [ ! -L "$HOME/.bin/$CMD_NAME" ];then
 				ln -s "$DOTFILES_DIR/setup.sh" "$HOME/.bin/$CMD_NAME"
 			fi
 
 			# Reload the shell rc
+			goal_msg "Trying to reload $rc_shell"
 			source $rc_shell
 			;;
 
