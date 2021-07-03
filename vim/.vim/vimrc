@@ -133,7 +133,7 @@ let g:netrw_liststyle = 3
 " lightline {{{
 set noshowmode "showmode substituted by lightline.vim
 let g:lightline = {
-			\ 'colorscheme': 'ayu_dark'
+			\ 'colorscheme': 'srcery_drk'
 			\}
 "}}}
 " vim-love-docs{{{
@@ -143,8 +143,8 @@ let g:lovedocs_colors = 'guifg=#E2BE6E ctermfg=159' "https://jonasjacek.github.i
 "}}}
 " Vim settings {{{
 " Interface{{{
-colorscheme ayu
-set number relativenumber "set hybrid numbers
+colorscheme srcery-drk
+" set number relativenumber "set hybrid numbers
 set laststatus=2 "status bar is shown even when in only one buffer
 set noerrorbells "disable beep on errors
 set wildmenu "display command line's tab complete options as menu
@@ -184,6 +184,26 @@ nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
 "nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 "  tpope's ↑
 
+let s:hidden_all = 0
+function! ToggleHiddenAll()
+	call ToggleModalHybridNumbers()
+	if s:hidden_all  == 0
+		let s:hidden_all = 1
+		set noshowmode
+		set noruler
+		set laststatus=0
+		set noshowcmd
+	else
+		let s:hidden_all = 0
+		set showmode
+		set ruler
+		set laststatus=2
+		set showcmd
+	endif
+endfunction
+
+nnoremap <silent> <C-S-z> :call ToggleHiddenAll()<CR>
+
 " Movement {{{
 nnoremap <C-N> :bnext<CR>
 nnoremap <C-M> :bprev<CR>
@@ -204,12 +224,26 @@ nnoremap <leader>fc :Colors<CR>
 autocmd FileType cpp nnoremap <leader>c :w<CR>:!clear && g++ -g -o %< % && ./%< <CR>
 
 " Switching between relative and nonrelative numbers between insert and normal mode
-augroup modalHybridNumbers
-	autocmd!
+function! ToggleModalHybridNumbers()
+	if !exists('#ModalHybridNumbers#InsertEnter')
+		set relativenumber number
+		augroup ModalHybridNumbers
+			autocmd!
 
-	autocmd InsertEnter * :setlocal norelativenumber
-	autocmd InsertLeave * :setlocal relativenumber
-augroup END
+			autocmd InsertEnter * :setlocal norelativenumber
+			autocmd InsertLeave * :setlocal relativenumber
+		augroup END
+	else
+		set norelativenumber nonumber
+		augroup ModalHybridNumbers
+			autocmd!
+		augroup END
+	endif
+endfunction
+call ToggleModalHybridNumbers()
+
+nnoremap <silent> <C-S-x> :call ToggleModalHybridNumbers()<CR>
+
 
 " Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
 autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
