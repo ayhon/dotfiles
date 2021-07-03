@@ -18,7 +18,7 @@ dependencies(){
 	for dep in $@; do
 		which $dep > /dev/null 2>&1 || missing_dep="$missing_dep $dep"
 	done
-	
+
 	# Install not-found dependencies
 	if [ -n "$missing_dep" ]; then 
 		# print_err "Missing dependencies:$missing_dep"
@@ -192,3 +192,4 @@ main(){
 }
 
 main "$@"
+
