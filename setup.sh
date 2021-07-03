@@ -7,7 +7,7 @@ DOTFILES_DIR="$GIT_DIR/dotfiles"
 CMD_NAME="setup"
 
 REQUIRED_PKGS="stow git curl"
-BASIC_PKGS="tmux nvim git unrar mpv pandoc tldr gdb feh"
+BASIC_PKGS="tmux neovim git unrar mpv pandoc tldr gdb feh"
 EXTRA_PKGS="obs gimp yad flameshot translate-shell ranger rofi"
 
 # Function definition
@@ -142,7 +142,7 @@ setup(){
 			;;
 
 		"nvim")
-			dependencies "nvim"
+			dependencies "neovim"
 			stow -Sd $DOTFILES_DIR -t $HOME nvim
 			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \
 				|| curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim \
