@@ -1,6 +1,10 @@
 #!/bin/bash
 # Setup script
 
+# TODO:
+#  - Only ask for password once (e.g. in 'setup nvim')
+#  - Fix output of global_msg in `inst()`
+
 GIT_DIR="$HOME/git"
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 DOTFILES_DIR="$GIT_DIR/dotfiles"
