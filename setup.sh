@@ -143,6 +143,7 @@ setup(){
 			;;
 
 		"nvim")
+			setup "vim"
 			dependencies "neovim"
 			stow -Sd $DOTFILES_DIR -t $HOME nvim
 			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \
