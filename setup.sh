@@ -116,9 +116,9 @@ setup(){
 				esac
 				echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> $rc_shell
 
-				# Reload the shell rc
-				goal_msg "Trying to reload $rc_shell"
-				source $rc_shell
+				# # Reload the shell rc
+				# goal_msg "Trying to reload $rc_shell"
+				# source $rc_shell
 			fi
 
 			goal_msg "Making sure $CMD_NAME is executable" 
