@@ -66,7 +66,7 @@ Plug 'junegunn/fzf.vim'	"Enable better multi file switching
 Plug 'tpope/vim-commentary'
 Plug 'flazz/vim-colorschemes'
 Plug 'itchyny/lightline.vim'
-Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
+" Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
 "Plug 'junegunn/goyo.vim'
 "Plug 'tpope/vim-surround'
 "Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
@@ -78,10 +78,18 @@ Plug 'ap/vim-css-color'
 Plug 'mattn/emmet-vim'
 "Plug 'leafgarland/typescript-vim'
 "Plug 'HerringtonDarkholme/yats.vim'
-Plug 'scrooloose/vim-slumlord'
-Plug 'aklt/plantuml-syntax'
+" Plug 'scrooloose/vim-slumlord'
+" Plug 'aklt/plantuml-syntax'
 Plug 'davisdude/vim-love-docs', {'do': './gen.sh'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+if has('nvim-0.5') 
+	Plug 'neovim/nvim-lspconfig' 
+	Plug 'nvim-lua/completion-nvim'
+	Plug 'ray-x/lsp_signature.nvim'
+	Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+	" Plug 'nvim-lua/plenary.nvim'
+	" Plug 'lewis6991/gitsigns.nvim'
+endif
 call plug#end()
 "}}}
 " Plugin settings {{{
@@ -139,6 +147,10 @@ let g:lightline = {
 " vim-love-docs{{{
 let g:lovedocs_colors = 'guifg=#E2BE6E ctermfg=159' "https://jonasjacek.github.io/colors/
 "}}}
+" vim-markdown {{{
+" let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua']
+let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua', 'java', 'javascript', 'html', 'css']
+"}}}
 "}}}
 "}}}
 " Vim settings {{{
@@ -168,6 +180,8 @@ set splitright "better window splitting
 set smarttab
 set nrformats-=octal
 set mouse=a "enable mouse
+set completeopt=menu,menuone,noselect "list of options for completion
+set hidden "hide unused buffers instead of unloading them (Permits buffer switching without saving)
 "}}}
 "}}}
 " Mappings {{{
@@ -183,6 +197,9 @@ nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
 "  Practical Vim's ↑ (Tip 81)
 "nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 "  tpope's ↑
+
+" Use <C-space> for omnifunc in insert mode
+inoremap <C-space> <C-x><C-o>
 
 let s:hidden_all = 0
 function! ToggleHiddenAll()
@@ -202,12 +219,21 @@ function! ToggleHiddenAll()
 	endif
 endfunction
 
-nnoremap <silent> <C-S-z> :call ToggleHiddenAll()<CR>
+nnoremap <silent> <A-S-z> :call ToggleHiddenAll()<CR>
 
-" Movement {{{
+" Buffer movement {{{
 nnoremap <C-N> :bnext<CR>
 nnoremap <C-M> :bprev<CR>
-" TODO: Alt-hjkl for windows
+
+" Alt-hjkl for windows 
+noremap <A-h> <C-w>h
+noremap <A-j> <C-w>j
+noremap <A-k> <C-w>k
+noremap <A-l> <C-w>l
+
+" Alt-Shift-jl to create windows 
+noremap <A-S-j> :sp<CR>
+noremap <A-S-l> :vsp<CR>
 "}}}
 
 " Quick google lookup
@@ -216,7 +242,8 @@ nnoremap <leader>gg :silent !firefox -P devlookup -private -search "" &<Left><Le
 " Fuzzy mappings{{{
 nnoremap <leader>fh :Helptags<CR>
 nnoremap <leader>ff :Files<CR>
-nnoremap <leader>fc :Colors<CR>
+nnoremap <leader>ft :Rg<CR>
+nnoremap <leader>fcs :Colors<CR>
 "}}}
 "}}}
 " Autocommands {{{
@@ -241,8 +268,9 @@ function! ToggleModalHybridNumbers()
 	endif
 endfunction
 call ToggleModalHybridNumbers()
+call ToggleHiddenAll()
 
-nnoremap <silent> <C-S-x> :call ToggleModalHybridNumbers()<CR>
+nnoremap <silent> <A-S-x> :call ToggleModalHybridNumbers()<CR>
 
 
 " Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
