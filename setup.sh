@@ -56,8 +56,9 @@ inst(){
 
 		case $distro_id in
 			"Pop_OS" | "Ubuntu")
-				sudo apt update && sudo apt upgrade
-				sudo apt install "$@"
+				sudo apt-get update -y 
+				sudo apt-get upgrade -y
+				sudo apt-get install -y "$@"
 				;;
 			"Arch Linux")
 				sudo pacman -Syyuu
