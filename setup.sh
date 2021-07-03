@@ -117,7 +117,7 @@ setup(){
 
 			# Make sure this script is executable
 			if [ ! -x "$SCRIPT_DIR/$SCRIPT_NAME" ]; then
-				chown +x "$SCRIPT_DIR/$SCRIPT_NAME"
+				chmod +x "$SCRIPT_DIR/$SCRIPT_NAME"
 			fi
 
 			# Make sure this script is found in path
