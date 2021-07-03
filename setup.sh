@@ -37,6 +37,7 @@ ensure_root(){
 			verbose_msg "Thanks for signing in"
 		else
 			print_err "Wrong password"
+			exit 1
 		fi
 	fi
 }
@@ -71,6 +72,7 @@ inst(){
 		esac
 	else
 		print_err "Only linux is suppported right now"
+		exit 1
 	fi
 
 }
@@ -90,7 +92,8 @@ setup(){
 				mkdir -p "$GIT_DIR" 
 				cd  "$GIT_DIR"
 				git clone "git@github.com:ayhon/dotfiles.git" || \
-					print_err "Coudn't clone dotfiles"
+					print_err "Coudn't clone dotfiles via ssh. Using https" && \
+					git clone "https://github.com/ayhon/dotfiles"
 			fi
 
 			# Make a `.bin` directory to store my scripts.
@@ -163,7 +166,6 @@ setup(){
 # Error handling
 print_err (){
 	printf "\e[31;1m[ERROR]\e[m %s\n" "$@" >&2
-	exit 1
 }
 
 usage(){
