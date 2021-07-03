@@ -116,7 +116,7 @@ setup(){
 			fi
 
 			# Make sure this script is executable
-			if [ ! -x "$DOTFILES_DIR/setup.sh"]; then
+			if [ ! -x "$DOTFILES_DIR/setup.sh" ]; then
 				chmod +x "$DOTFILES_DIR/setup.sh"
 			fi
 
