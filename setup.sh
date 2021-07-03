@@ -6,6 +6,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 DOTFILES_DIR="$GIT_DIR/dotfiles"
 CMD_NAME="setup"
 
+REQUIRED_PKGS="stow git curl"
 BASIC_PKGS="tmux nvim git unrar mpv pandoc tldr gdb feh"
 EXTRA_PKGS="obs gimp yad flameshot translate-shell ranger rofi"
 
@@ -81,7 +82,7 @@ setup(){
 	# setup to execute.
 
 	cd $HOME
-	dependencies stow git
+	dependencies "$REQUIRED_PKGS"
 	case $1 in
 		"init")
 			#-# Things I need for this script to work #-#
@@ -123,6 +124,9 @@ setup(){
 			if [ ! -L "$HOME/.bin/$CMD_NAME" ];then
 				ln -s "$DOTFILES_DIR/setup.sh" "$HOME/.bin/$CMD_NAME"
 			fi
+
+			# Reload the shell rc
+			source $rc_shell
 			;;
 
 		"vim")
