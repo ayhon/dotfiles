@@ -67,10 +67,10 @@ inst(){
 				sudo zypper up -y
 				sudo zypper in -y "$@"
 				;;
-				# TODO: Add more possibilities
-			esac
-		else
-			print_err "Only linux is suppported right now, used $distro_id"
+			# TODO: Add more possibilities
+		esac
+	else
+		print_err "Only linux is suppported right now"
 	fi
 
 }
@@ -125,12 +125,14 @@ setup(){
 
 		"vim")
 			stow -Sd $DOTFILES_DIR -t $HOME vim
-			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+				    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 			;;
 
 		"nvim")
 			stow -Sd $DOTFILES_DIR -t $HOME nvim
-			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \ || curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \ || curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim \ 
+				--create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 			;;
 
 		"tmux")
