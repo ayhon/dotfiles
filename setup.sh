@@ -11,6 +11,9 @@ BASIC_PKGS="tmux nvim git unrar mpv pandoc tldr gdb feh"
 EXTRA_PKGS="obs gimp yad flameshot translate-shell ranger rofi"
 
 # Function definition
+goal_msg(){ printf "\e[33;1m[GOAL]\e[m %s\n" "$@"; }
+verbose_msg(){ echo $@; }
+
 dependencies(){
 	local missing_dep=""
 
@@ -31,7 +34,7 @@ ensure_root(){
 	if [[ "$EUID" != 0 ]]; then
 		sudo -k
 		if sudo true; then
-			echo "Thanks for signing in"
+			verbose_msg "Thanks for signing in"
 		else
 			print_err "Wrong password"
 		fi
@@ -39,15 +42,17 @@ ensure_root(){
 }
 inst(){
 	# System agnostic installer
-	printf "\e[33;1m[INSTALL]\e[m %s$@\n" 
+	goal_msg "Installing $@"
 
 	#elif [[ "$OSTYPE" == "darwin" ]]; then
 	#elif [[ "$OSTYPE" == "cygwin" ]]; then
-	if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+	if [[ "$OSTYPE" == "linux"* ]]; then
 		ensure_root
-		local distro_id="$(head -n1 /etc/*-release | grep NAME)"
+
+		distro_id="$(head -n1 /etc/*-release | grep NAME)"
 		distro_id="$(echo $distro_id | sed -s "s/NAME=//g;s/\!//g;s/\"//g")"
-		echo $distro_id
+		verbose_msg "Detected distribution: $distro_id"
+
 		case $distro_id in
 			"Pop_OS" | "Ubuntu")
 				sudo apt update && sudo apt upgrade
@@ -57,15 +62,15 @@ inst(){
 				sudo pacman -Syyuu
 				sudo pacman -S "$@"
 				;;
-			"openSUSE *")
+			"openSUSE"*)
 				sudo zypper ref
-				sudo zypper up
+				sudo zypper up -y
 				sudo zypper in -y "$@"
 				;;
 				# TODO: Add more possibilities
 			esac
 		else
-			print_err "Only linux is suppported right now"
+			print_err "Only linux is suppported right now, used $distro_id"
 	fi
 
 }
@@ -120,34 +125,38 @@ setup(){
 
 		"vim")
 			stow -Sd $DOTFILES_DIR -t $HOME vim
-			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-				https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-							;;
-						"nvim")
-							stow -Sd $DOTFILES_DIR -t $HOME nvim
-							[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \ || curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim \ 
-								--create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-															;;
-														"tmux")
-															stow -Sd $DOTFILES_DIR -t $HOME tmux
-															;;
-														"basic")
-															dependencies "$BASIC_PKGS"
-															;;
-														"extra")
-															dependencies "$EXTRA_PKGS"
-															;;
-														"test")
-															ensure_root
-															dependencies R python3 python whaaaaat
-															print_err "End of testing"
-															;;
-														*)
-															usage
-															exit 1
-															;;
-													esac
-												}
+			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+			;;
+
+		"nvim")
+			stow -Sd $DOTFILES_DIR -t $HOME nvim
+			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \ || curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+			;;
+
+		"tmux")
+			stow -Sd $DOTFILES_DIR -t $HOME tmux
+			;;
+
+		"basic")
+			dependencies "$BASIC_PKGS"
+			;;
+
+		"extra")
+			dependencies "$EXTRA_PKGS"
+			;;
+
+		"test")
+			ensure_root
+			dependencies R python3 python whaaaaat
+			print_err "End of testing"
+			;;
+
+		*)
+			usage
+			exit 1
+			;;
+	esac
+}
 
 # Error handling
 print_err (){
