@@ -115,6 +115,10 @@ setup(){
 						;;
 				esac
 				echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> $rc_shell
+
+				# Reload the shell rc
+				goal_msg "Trying to reload $rc_shell"
+				source $rc_shell
 			fi
 
 			goal_msg "Making sure $CMD_NAME is executable" 
@@ -128,9 +132,6 @@ setup(){
 				ln -s "$DOTFILES_DIR/setup.sh" "$HOME/.bin/$CMD_NAME"
 			fi
 
-			# Reload the shell rc
-			goal_msg "Trying to reload $rc_shell"
-			source $rc_shell
 			;;
 
 		"vim")
