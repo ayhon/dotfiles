@@ -101,7 +101,8 @@ setup(){
 			# Also, add it to my PATH
 			if [ ! -d "$HOME/.bin" ]; then
 				mkdir "$HOME/.bin"
-				rc_shell="$HOME/.bashrc"
+				local rc_shell="$HOME/.bashrc"
+				verbose_msg "Found RC file of shell in $rc_shell"
 				case "$(basename $SHELL)" in
 					"zsh")
 						rc_shell="$HOME/.zshrc"
