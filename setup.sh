@@ -6,6 +6,7 @@
 #  - Fix output of global_msg in `inst()`
 
 GIT_DIR="$HOME/git"
+DECAY_DIR="$HOME/Decay"
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 DOTFILES_DIR="$GIT_DIR/dotfiles"
 CMD_NAME="setup"
@@ -174,6 +175,22 @@ setup(){
 			print_err "End of testing"
 			;;
 
+		"decay")
+			goal_msg "Making decay directory"
+			mkdir -p "$DECAY_DIR"
+
+			# Set up directory for the icons of the notifications
+			goal_msg "Setting icons in icons directory"
+			decay_icons_dir="$HOME/.local/share/icons/decay-script"
+			mkdir -p "$decay_icons_dir"
+			ln -s "$DOTFILES_DIR/decay/clock.svg" "$decay_icons_dir/clock.svg" 2>/dev/null
+			ln -s "$DOTFILES_DIR/decay/trash.svg" "$decay_icons_dir/trash.svg" 2>/dev/null
+
+			# Add entry to crontab
+			goal_msg "Installing script in crontab"
+			(crontab -l; echo -e "0 0 * * 7 sh $DOTFILES_DIR/decay/decay-script.sh '$DECAY_DIR'\n ") | crontab -
+			;;
+
 		*)
 			usage
 			exit 1
@@ -192,7 +209,8 @@ Usage:
   $SCRIPT_NAME [options] [target]
 
 Options:
-  -h --help         Show this help message
+  -h --help             Show this help message
+  -lv --load-variables  Exit after loading variables
 
 Targets:
   init   - Basic conditions 
@@ -200,6 +218,7 @@ Targets:
   extra  - Install extra packages
   vim    - Setup vim config
   nvim   - Setup nvim config
+  decay  - Setup a decaying directory
 EOF
 }
 main(){
@@ -209,6 +228,10 @@ main(){
 	setup "init"
 	while [ $# -gt 0 ]; do
 		case $1 in
+			"-lv"|"--load-variables")
+				exit 0
+				;;
+
 			"-h"|"--help")
 				usage
 				exit 0
