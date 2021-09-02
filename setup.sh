@@ -100,7 +100,8 @@ setup(){
 				cd  "$GIT_DIR"
 				git clone "git@github.com:ayhon/dotfiles.git" || \
 					print_err "Coudn't clone dotfiles via ssh. Using https" && \
-					git clone "https://github.com/ayhon/dotfiles"
+					git clone "https://github.com/ayhon/dotfiles" && \
+					git remote set-url origin "git@github.com:ayhon/dotfiles.git" --push
 			fi
 
 			goal_msg "Making a .bin directory to store script"
