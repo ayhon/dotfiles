@@ -15,10 +15,12 @@ REQUIRED_PKGS="stow git curl"
 BASIC_PKGS="tmux neovim git unrar mpv pandoc tldr gdb feh"
 EXTRA_PKGS="obs gimp yad flameshot translate-shell ranger rofi"
 
-# Function definition
+# Giving information
 goal_msg(){ printf "\e[33;1m[GOAL]\e[m %s\n" "$@"; }
 verbose_msg(){ echo $@; }
+print_err (){ printf "\e[31;1m[ERROR]\e[m %s\n" "$@" >&2 }
 
+# Program installation
 dependencies(){
 	local missing_dep=""
 
@@ -82,6 +84,8 @@ inst(){
 	fi
 
 }
+
+# Main function
 setup(){
 	# Main function. 
 	# It takes one argument, the type of
@@ -98,10 +102,22 @@ setup(){
 			if [ ! -d "$DOTFILES_DIR" ]; then
 				mkdir -p "$GIT_DIR" 
 				cd  "$GIT_DIR"
-				git clone "git@github.com:ayhon/dotfiles.git" || \
-					print_err "Coudn't clone dotfiles via ssh. Using https" && \
-					git clone "https://github.com/ayhon/dotfiles" && \
+
+				if [ -d "$HOME/.ssh" ]; then
+					git clone "git@github.com:ayhon/dotfiles.git"
+				else
+					print_err "Coudn't clone dotfiles via ssh. Using https"
+
+					git clone "https://github.com/ayhon/dotfiles"
 					git remote set-url origin "git@github.com:ayhon/dotfiles.git" --push
+					goal_msg "Creating .ssh directory and needed files (Import your ssh keys later)"
+
+					mkdir "$HOME/.ssh"
+					chmod 700 "$HOME/.ssh"
+
+					touch "$HOME/.ssh/authorized_keys"
+					chmod 600 "$HOME/.ssh/authorized_keys"
+				fi
 			fi
 
 			goal_msg "Making a .bin directory to store script"
@@ -198,12 +214,6 @@ setup(){
 			;;
 	esac
 }
-
-# Error handling
-print_err (){
-	printf "\e[31;1m[ERROR]\e[m %s\n" "$@" >&2
-}
-
 usage(){
 	cat <<EOF
 Usage:
