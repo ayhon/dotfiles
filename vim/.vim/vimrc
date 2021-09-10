@@ -64,24 +64,28 @@ call plug#begin('~/.vim/plugged')
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'	"Enable better multi file switching
 Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+"Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
 Plug 'flazz/vim-colorschemes'
 Plug 'itchyny/lightline.vim'
-" Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
+"Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
 "Plug 'junegunn/goyo.vim'
-"Plug 'tpope/vim-surround'
-"Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
 Plug 'lervag/vimtex' ", {'do': 'notify-send \"Dependencies\" \"Install latexmk\"',}
 " Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
 "Plug 'vim/killersheep'
 "Plug 'ycm-core/YouCompleteMe'
 Plug 'ap/vim-css-color'
-Plug 'mattn/emmet-vim'
+Plug 'mattn/emmet-vim', { 'for': ['js','jsx','ts','tsx','html']}
 "Plug 'leafgarland/typescript-vim'
 "Plug 'HerringtonDarkholme/yats.vim'
 " Plug 'scrooloose/vim-slumlord'
 " Plug 'aklt/plantuml-syntax'
 Plug 'davisdude/vim-love-docs', {'do': './gen.sh'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
+Plug 'Twinside/vim-haskellConceal', {'for': ['haskell']}
+Plug 'psliwka/vim-smoothie'
+Plug 'christoomey/vim-tmux-navigator'
 if has('nvim-0.5') 
 	Plug 'neovim/nvim-lspconfig' 
 	Plug 'nvim-lua/completion-nvim'
@@ -149,8 +153,18 @@ let g:lovedocs_colors = 'guifg=#E2BE6E ctermfg=159' "https://jonasjacek.github.i
 "}}}
 " vim-markdown {{{
 " let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua']
-let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua', 'java', 'javascript', 'html', 'css']
+let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua', 'java', 'javascript', 'html', 'css', 'haskell']
 "}}}
+" vim-tmux-navigator {{{
+let g:tmux_navigator_no_mappings = 1
+
+function! SetNavigationWithinTMUX()
+	nnoremap <silent> <A-h> :TmuxNavigateLeft<cr>
+	nnoremap <silent> <A-j> :TmuxNavigateDown<cr>
+	nnoremap <silent> <A-k> :TmuxNavigateUp<cr>
+	nnoremap <silent> <A-l> :TmuxNavigateRight<cr>
+endfunction
+" }}}
 "}}}
 "}}}
 " Vim settings {{{
@@ -222,14 +236,16 @@ endfunction
 nnoremap <silent> <A-S-z> :call ToggleHiddenAll()<CR>
 
 " Buffer movement {{{
-nnoremap <C-N> :bnext<CR>
-nnoremap <C-M> :bprev<CR>
+nnoremap <C-N> :bprev<CR>
+nnoremap <C-M> :bnext<CR>
 
 " Alt-hjkl for windows 
 noremap <A-h> <C-w>h
 noremap <A-j> <C-w>j
 noremap <A-k> <C-w>k
 noremap <A-l> <C-w>l
+" TODO: Test for vim-tmux-navigator plugin, and then ...
+call SetNavigationWithinTMUX()
 
 " Alt-Shift-jl to create windows 
 noremap <A-S-j> :sp<CR>
@@ -238,7 +254,7 @@ noremap <A-S-l> :vsp<CR>
 
 " Quick google lookup
 nnoremap <leader>gg :silent !firefox -P devlookup -private -search "" &<Left><Left><Left>
-
+"
 " Fuzzy mappings{{{
 nnoremap <leader>fh :Helptags<CR>
 nnoremap <leader>ff :Files<CR>
@@ -278,6 +294,8 @@ autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
 
 " Syntax highlighting in .rasi files (Rofi theme files)
 autocmd BufNewFile,BufRead /*.rasi setf css
+" Syntax highlighting in .mdx files (Markdown extended files)
+autocmd BufNewFile,BufRead /*.mdx setf markdown
 
 " Remove trailing whitespaces
 " autocmd BufWritePre * :%s/\s\+$//e
