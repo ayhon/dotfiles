@@ -18,7 +18,7 @@ EXTRA_PKGS="obs gimp yad flameshot translate-shell ranger rofi"
 # Giving information
 goal_msg(){ printf "\e[33;1m[GOAL]\e[m %s\n" "$@"; }
 verbose_msg(){ echo $@; }
-print_err (){ printf "\e[31;1m[ERROR]\e[m %s\n" "$@" >&2 }
+print_err (){ printf "\e[31;1m[ERROR]\e[m %s\n" "$@" >&2; }
 
 # Program installation
 dependencies(){
@@ -95,6 +95,8 @@ setup(){
 	dependencies "$REQUIRED_PKGS"
 	case $1 in
 		"init")
+			goal_msg "Configuring setup command..."
+			goal_msg "Setting up "
 			#-# Things I need for this script to work #-#
 
 			# Make sure my `dotfiles` repo was clonned locally
@@ -158,6 +160,7 @@ setup(){
 			;;
 
 		"vim")
+			goal_msg "Configuring vim..."
 			dependencies "vim"
 			stow -Sd $DOTFILES_DIR -t $HOME vim
 			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
@@ -165,6 +168,7 @@ setup(){
 			;;
 
 		"nvim")
+			goal_msg "Configuring nvim..."
 			setup "vim"
 			dependencies "neovim"
 			stow -Sd $DOTFILES_DIR -t $HOME nvim
@@ -174,15 +178,19 @@ setup(){
 			;;
 
 		"tmux")
+			goal_msg "Configuring tmux..."
 			dependencies "tmux"
 			stow -Sd $DOTFILES_DIR -t $HOME tmux
 			;;
 
 		"basic")
+			goal_msg "Configuring basic..."
 			dependencies "$BASIC_PKGS"
 			;;
 
 		"extra")
+			goal_msg "Configuring extra..."
+			dependencies "$BASIC_PKGS"
 			dependencies "$EXTRA_PKGS"
 			;;
 
@@ -193,6 +201,7 @@ setup(){
 			;;
 
 		"decay")
+			goal_msg "Configuring decay..." 
 			goal_msg "Making decay directory"
 			mkdir -p "$DECAY_DIR"
 
