@@ -20,6 +20,11 @@ goal_msg(){ printf "\e[33;1m[GOAL]\e[m %s\n" "$@"; }
 verbose_msg(){ echo $@; }
 print_err (){ printf "\e[31;1m[ERROR]\e[m %s\n" "$@" >&2; }
 
+# Getting information
+get_display_server(){
+	loginctl show-session $(loginctl | grep $(whoami) | cut -d" " -f6) -p Type | cut -d= -f2
+}
+
 # Program installation
 dependencies(){
 	local missing_dep=""
@@ -85,6 +90,33 @@ inst(){
 
 }
 
+get_RC_shell(){
+	case "$(basename $SHELL)" in
+		"zsh")
+			rc_shell="$HOME/.zshrc"
+			;;
+		"bash")
+			rc_shell="$HOME/.bashrc"
+			;;
+		*)
+			print_err "Couldn't recognize shell. Using .bashrc"
+			rc_shell="$HOME/.bashrc" # Default
+			return 1
+			;;
+	esac
+	echo $rc_shell
+}
+
+install_script(){
+	# install_script {script-name}̣̣̣̣ [executable-name]
+	# installs script-name as executable-name
+	local script_pathname="$DOTFILES_DIR/scripts/$1" 
+	[ -f "$script_pathname" ] || return 1
+	chmod +x "$script_pathname"
+	mkdir -p "$HOME/.local/bin"
+	ln -s "$script_pathname" "$HOME/.local/bin/$([ -z $2 ] && echo $1 || echo $2)"
+}
+
 # Main function
 setup(){
 	# Main function. 
@@ -126,19 +158,7 @@ setup(){
 			# Also, add it to my PATH
 			if [ ! -d "$HOME/.bin" ]; then
 				mkdir "$HOME/.bin"
-				local rc_shell="$HOME/.bashrc"
-				verbose_msg "Found RC file of shell in $rc_shell"
-				case "$(basename $SHELL)" in
-					"zsh")
-						rc_shell="$HOME/.zshrc"
-						;;
-					"bash")
-						rc_shell="$HOME/.bashrc"
-						;;
-					*)
-						print_err "Couldn't recognize shell"
-						;;
-				esac
+				local rc_shell="$(get_RC_shell)"
 				echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> $rc_shell
 
 				# # Reload the shell rc
@@ -195,9 +215,10 @@ setup(){
 			;;
 
 		"test")
-			ensure_root
-			dependencies R python3 python whaaaaat
-			print_err "End of testing"
+			# ensure_root
+			# dependencies R python3 python whaaaaat
+			# print_err "End of testing"
+			echo "$@"
 			;;
 
 		"decay")
@@ -217,7 +238,39 @@ setup(){
 			(crontab -l; echo -e "0 0 * * 7 sh $DOTFILES_DIR/decay/decay-script.sh '$DECAY_DIR'\n ") | crontab -
 			;;
 
+		"colors")
+			echo 'for i in {0..9}; do 	
+				echo -e \"\e[3${i}mThis is 3$i\e[m";
+			done' >> $(get_RC_shell)
+
+			;;
+
+		"gdrive")
+			dependencies "rclone"
+			install_script "sync_drive.sh"
+
+			# TODO:
+			# - Extract argument info (Either `local` or `remote`)
+			# - Use sane defaults (For local a new folder, for remote nothing)
+			# - Setup a crontab or entr process to autoupdate (Look into)
+			if [ $# -gt 2 ]; then 
+				command_option="$(echo $2 | cut -d= -f1 | sed 's/^-*//g')"
+				if [ $command_option == "target" ]; then
+					gdrive_local_directory="$(echo $2 | cut -d= -f2)"
+
+					rclone config
+
+					print_err "Target not finished yet"
+					
+				else
+					print_err "Unrecognized option \"$command_option\""
+				fi
+			else
+				print_err "Provide a --target=DIRECTORY to the gdrive targets"
+			fi
+			;;
 		*)
+			print_err "Option not recognized: \"$1\""
 			usage
 			exit 1
 			;;
@@ -241,6 +294,12 @@ Targets:
   decay  - Setup a decaying directory
 EOF
 }
+is_argument(){
+	case $1 in
+		"-"*) true;;
+		*) false;;
+	esac
+}
 main(){
 	# echo $SCRIPT_DIR
 	# echo $0
@@ -257,7 +316,12 @@ main(){
 				exit 0
 				;;
 			*)
-				setup $1
+				args="$1"
+				while [ $# -ge 2 ] && is_argument "$2" ; do
+					args="$args $2"
+					shift
+				done
+				setup $args
 				;;
 		esac
 		shift
