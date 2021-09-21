@@ -109,10 +109,12 @@ get_RC_shell(){
 
 install_script(){
 	# install_script {script-name}̣̣̣̣ [executable-name]
-	# installs script-name as executable-name
 	local script_pathname="$DOTFILES_DIR/scripts/$1" 
+	
 	[ -f "$script_pathname" ] || return 1
+
 	chmod +x "$script_pathname"
+
 	mkdir -p "$HOME/.local/bin"
 	ln -s "$script_pathname" "$HOME/.local/bin/$([ -z $2 ] && echo $1 || echo $2)"
 }
@@ -128,7 +130,6 @@ setup(){
 	case $1 in
 		"init")
 			goal_msg "Configuring setup command..."
-			goal_msg "Setting up "
 			#-# Things I need for this script to work #-#
 
 			# Make sure my `dotfiles` repo was clonned locally
@@ -154,28 +155,8 @@ setup(){
 				fi
 			fi
 
-			goal_msg "Making a .bin directory to store script"
-			# Also, add it to my PATH
-			if [ ! -d "$HOME/.bin" ]; then
-				mkdir "$HOME/.bin"
-				local rc_shell="$(get_RC_shell)"
-				echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> $rc_shell
-
-				# # Reload the shell rc
-				# goal_msg "Trying to reload $rc_shell"
-				# source $rc_shell
-			fi
-
-			goal_msg "Making sure $CMD_NAME is executable" 
-			if [ ! -x "$DOTFILES_DIR/setup.sh" ]; then
-				chmod +x "$DOTFILES_DIR/setup.sh"
-			fi
-
-			# Make sure this script is found in path
-			goal_msg "Making sure this script if reachable by PATH"
-			if [ ! -L "$HOME/.bin/$CMD_NAME" ];then
-				ln -s "$DOTFILES_DIR/setup.sh" "$HOME/.bin/$CMD_NAME"
-			fi
+			goal_msg "Installing script"
+			install_script "../setup.sh" $CMD_NAME
 
 			;;
 
