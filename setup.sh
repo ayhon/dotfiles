@@ -81,6 +81,10 @@ inst(){
 				sudo zypper up -y
 				sudo zypper in -y "$@"
 				;;
+			"Fedora")
+				sudo dnf upgrade
+				sudo dnf install -y "$@"
+				;;
 			# TODO: Add more possibilities
 		esac
 	else
