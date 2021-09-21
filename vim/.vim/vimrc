@@ -71,7 +71,7 @@ Plug 'itchyny/lightline.vim'
 "Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
 "Plug 'junegunn/goyo.vim'
 Plug 'lervag/vimtex' ", {'do': 'notify-send \"Dependencies\" \"Install latexmk\"',}
-" Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
+Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
 "Plug 'vim/killersheep'
 "Plug 'ycm-core/YouCompleteMe'
 Plug 'ap/vim-css-color'
@@ -82,6 +82,7 @@ Plug 'mattn/emmet-vim', { 'for': ['js','jsx','ts','tsx','html']}
 " Plug 'aklt/plantuml-syntax'
 Plug 'davisdude/vim-love-docs', {'do': './gen.sh'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'plasticboy/vim-markdown', { 'for' : ['markdown']}
 Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
 Plug 'Twinside/vim-haskellConceal', {'for': ['haskell']}
 Plug 'psliwka/vim-smoothie'
@@ -154,6 +155,8 @@ let g:lovedocs_colors = 'guifg=#E2BE6E ctermfg=159' "https://jonasjacek.github.i
 " vim-markdown {{{
 " let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua']
 let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua', 'java', 'javascript', 'html', 'css', 'haskell']
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
 "}}}
 " vim-tmux-navigator {{{
 let g:tmux_navigator_no_mappings = 1
@@ -261,6 +264,8 @@ nnoremap <leader>ff :Files<CR>
 nnoremap <leader>ft :Rg<CR>
 nnoremap <leader>fcs :Colors<CR>
 "}}}
+" Output the hlgroups under the cursor https://vim.fandom.com/wiki/Identify_the_syntax_highlighting_group_used_at_the_cursor
+noremap <F10> :echom 'hi<' . synIDattr(synID(line("."),col("."),1),"name") . '> trans<' . synIDattr(synID(line("."),col("."),0),"name") . '> lo<' . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . '>'<CR> 
 "}}}
 " Autocommands {{{
 " TODO: augroup's

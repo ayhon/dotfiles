@@ -1,0 +1,555 @@
+global !p
+texMathZones = ['texMathZone' + x for x in ['A', 'AS', 'B', 'BS', 'C', 'CS', 'D', 'DS', 'E', 'ES', 'F', 'FS', 'G', 'GS', 'H', 'HS', 'I', 'IS', 'J', 'JS', 'K', 'KS', 'L', 'LS', 'XX', 'V', 'W', 'X', 'Y', 'Z', 'AmsA', 'AmsB', 'AmsC', 'AmsD', 'AmsE', 'AmsF', 'AmsG', 'AmsAS', 'AmsBS', 'AmsCS', 'AmsDS', 'AmsES', 'AmsFS', 'AmsGS' ]]
+texIgnoreMathZones = ['texMathText']
+texMathZoneIds = vim.eval('map('+str(texMathZones)+", 'hlID(v:val)')")
+texIgnoreMathZoneIds = vim.eval('map('+str(texIgnoreMathZones)+", 'hlID(v:val)')")
+ignore = texIgnoreMathZoneIds[0]
+def latex():
+	with open("/tmp/salida","a") as f:
+		synstackids = vim.eval("synstack(line('.'), col('.') - (col('.')>=2 ? 1 : 0))")
+		try:
+			# f.write("YES\n"+str(texMathZoneIds)+"\n")
+			# f.write("NO\n"+str(texIgnoreMathZoneIds)+"\n")
+			# f.write(str(synstackids)+"\n")
+			first = next(i for i in reversed(synstackids) if i in texMathZoneIds)
+			# f.write("FIRST\n"+str(first)+"\n")
+			return first not in texIgnoreMathZoneIds
+		except StopIteration:
+			return False
+
+def not_latex():
+	return not latex()
+
+def contextualized(string):
+	if not snip.c:
+		snip.rv = string
+		if not latex():
+			snip.rv = '$'+snip.rv+'$'
+endglobal
+
+priority 100
+context "latex()"
+snippet ... "ldots" iA
+\ldots
+endsnippet
+
+context "latex()"
+snippet => "implies" Ai
+\implies
+endsnippet
+
+context "latex()"
+snippet =< "implied by" Ai
+\impliedby
+endsnippet
+
+context "latex()"
+snippet iff "iff" Ai
+\iff
+endsnippet
+
+context "latex()"
+snippet // "Fraction" iA
+\\frac{$1}{$2}$0
+endsnippet
+
+snippet / "Fraction" i
+\\frac{${VISUAL}}{$1}$0
+endsnippet
+
+context "latex()"
+snippet '((\d+)|(\d*)(\\)?([A-Za-z]+)((\^|_)(\{\d+\}|\d))*)/' "symbol frac" wrA
+\\frac{`!p snip.rv = match.group(1)`}{$1}$0
+endsnippet
+
+priority 1000
+context "latex()"
+snippet '^.*\)/' "() frac" wrA
+`!p
+stripped = match.string[:-1] # Quitamos el / al final, no )
+depth = 0 # Siempre es 1 tras la primera iteración por ↑
+i = len(stripped) - 1→c
+while True:
+	if stripped[i] == ')': depth += 1
+	if stripped[i] == '(': depth -= 1
+	if depth == 0: break;
+	i-=1
+snip.rv = stripped[0:i] + "\\frac{" + stripped[i+1:-1] + "}"
+`{$1}$0
+endsnippet
+
+snippet '([A-Za-z])(\d)' "auto subscript" wrA
+`!p contextualized(match.group(1)+"_"+match.group(2))`
+endsnippet
+
+context "latex()"
+snippet '([A-Za-z])_(\d\d)' "auto subscript2" wrA
+`!p snip.rv = match.group(1)`_{`!p snip.rv = match.group(2)`}
+endsnippet
+
+snippet sympy "sympyblock " w
+sympy $1 sympy$0
+endsnippet
+
+priority 10000
+snippet 'sympy(.*)sympy' "sympy" wr
+`!p
+from sympy import *
+x, y, z, t = symbols('x y z t')
+a, b, c, d = symbols('a b c d')
+u, v, w = symbols('u v w')
+k, m, n = symbols('k m n', integer=True)
+f, g, h = symbols('f g h', cls=Function)
+init_printing()
+snip.rv = eval('latex(' + match.group(1).replace('\\', '').replace('^', '**').replace('{', '(').replace('}', ')') + ')')
+`
+endsnippet
+
+# priority 1000
+# snippet math "mathematicablock" w
+# math $1 math$0
+# endsnippet
+
+# priority 10000
+# snippet 'math(.*)math' "math" wr
+# `!p
+# import subprocess
+# code = match.group(1)
+# code = 'ToString[' + code + ', TeXForm]'
+# snip.rv = subprocess.check_output(['wolframscript', '-code', code])
+# `
+# endsnippet
+
+context "latex()"
+snippet == "equals" iA
+&= $1 \\\\
+endsnippet
+
+snippet != "equals" iA
+`!p contextualized("\\neq")`
+endsnippet
+
+context "latex()"
+snippet ceil "ceil" iA
+\left\lceil $1 \right\rceil $0
+endsnippet
+
+context "latex()"
+snippet floor "floor" iA
+\left\lfloor $1 \right\rfloor$0
+endsnippet
+
+context "latex()"
+snippet pmat "pmat" iA
+\begin{pmatrix} $1 \end{pmatrix} $0
+endsnippet
+
+context "latex()"
+snippet bmat "bmat" iA
+\begin{bmatrix} $1 \end{bmatrix} $0
+endsnippet
+
+context "latex()"
+snippet () "left( right)" iA
+\left( ${1:${VISUAL}} \right) $0
+endsnippet
+
+snippet lr "left( right)" i
+\left( ${1:${VISUAL}} \right) $0
+endsnippet
+
+snippet lr( "left( right)" i
+\left( ${1:${VISUAL}} \right) $0
+endsnippet
+
+snippet lr| "left| right|" i
+\left| ${1:${VISUAL}} \right| $0
+endsnippet
+
+snippet lr{ "left\{ right\}" i
+\left\\{ ${1:${VISUAL}} \right\\} $0
+endsnippet
+
+snippet lrb "left\{ right\}" i
+\left\\{ ${1:${VISUAL}} \right\\} $0
+endsnippet
+
+snippet lr[ "left[ right]" i
+\left[ ${1:${VISUAL}} \right] $0
+endsnippet
+
+snippet lra "leftangle rightangle" iA
+\left<${1:${VISUAL}} \right>$0
+endsnippet
+
+context "latex()"
+snippet conj "conjugate" iA
+\overline{$1}$0
+endsnippet
+
+snippet sum "sum" w
+\sum_{${1:i}=${2:1}}^{${3:\infty}} ${4:a_\{$1\} z^\{$1\}}
+endsnippet
+
+snippet lim "limit" w
+\lim_{${1:n} \to ${2:\infty}}
+endsnippet
+
+snippet limsup "limsup" w
+\limsup_{${1:n} \to ${2:\infty}}
+endsnippet
+
+snippet prod "product" w
+\prod_{${1:n=${2:1}}}^{${3:\infty}} ${4:${VISUAL}} $0
+endsnippet
+
+snippet part "d/dx" w
+\frac{\partial ${1:V}}{\partial ${2:x}} $0
+endsnippet
+
+context "latex()"
+snippet sq "\sqrt{}" iA
+\sqrt{${1:${VISUAL}}} $0
+endsnippet
+
+context "latex()"
+snippet sr "^2" iA
+^2
+endsnippet
+
+context "latex()"
+snippet cb "^3" iA
+^3
+endsnippet
+
+context "latex()"
+snippet td "to the ... power" iA
+^{$1}$0
+endsnippet
+
+context "latex()"
+snippet __ "subscript" iA
+_{$1}$0
+endsnippet
+
+snippet ooo "\infty" iA
+`!p
+snip.rv = '\\infty'
+if not latex():
+	snip.rv = '$'+snip.rv+'$'
+`
+endsnippet
+
+snippet rij "mrij" i
+(${1:x}_${2:n})_{${3:$2}\\in${4:\\N}}$0
+endsnippet
+
+snippet <= "leq" iA
+`!p contextualized("\\le")`
+endsnippet
+
+snippet >= "geq" iA
+`!p contextualized("\\ge")`
+endsnippet
+
+context "latex()"
+snippet EE "geq" iA
+\exists
+endsnippet
+
+context "latex()"
+snippet AA "forall" iA
+\forall
+endsnippet
+
+context "latex()"
+snippet xnn "xn" iA
+x_{n}
+endsnippet
+
+context "latex()"
+snippet ynn "yn" iA
+y_{n}
+endsnippet
+
+
+context "latex()"
+snippet xii "xi" iA
+x_{i}
+endsnippet
+
+context "latex()"
+snippet yii "yi" iA
+y_{i}
+endsnippet
+
+context "latex()"
+snippet xjj "xj" iA
+x_{j}
+endsnippet
+
+context "latex()"
+snippet yjj "yj" iA
+y_{j}
+endsnippet
+
+context "latex()"
+snippet xp1 "x" iA
+x_{n+1}
+endsnippet
+
+context "latex()"
+snippet xmm "x" iA
+x_{m}
+endsnippet
+
+snippet R0+ "R0+" iA
+\\R_0^+
+endsnippet
+
+snippet lll "l" iA
+`!p contextualized("\\ell")`
+endsnippet
+
+context "latex()"
+snippet nabl "nabla" iA
+\nabla
+endsnippet
+
+context "latex()"
+snippet xx "cross" iA
+\times
+endsnippet
+
+priority 100
+snippet ** "cdot" iA
+\cdot
+endsnippet
+
+context "latex()"
+snippet norm "norm" iA
+\|$1\|$0
+endsnippet
+
+priority 100
+context "latex()"
+snippet '(?<!\\)(sin|cos|arccot|cot|csc|ln|log|exp|star|perp)' "ln" rwA
+\\`!p snip.rv = match.group(1)`
+endsnippet
+
+priority 300
+context "latex()"
+snippet dint "integral" wA
+\int_{${1:-\infty}}^{${2:\infty}} ${3:${VISUAL}} $0
+endsnippet
+
+priority 200
+context "latex()"
+snippet '(?<!\\)(arcsin|arccos|arctan|arccot|arccsc|arcsec|pi|zeta|int)' "ln" rwA
+\\`!p snip.rv = match.group(1)`
+endsnippet
+
+priority 100
+context "latex()"
+snippet -> "to" iA
+\to
+endsnippet
+
+context "latex()"
+snippet → "to" iA
+\to
+endsnippet
+
+priority 200
+context "latex()"
+snippet <-> "leftrightarrow" iA
+\leftrightarrow
+endsnippet
+
+context "latex()"
+snippet !> "mapsto" iA
+\mapsto
+endsnippet
+
+context "latex()"
+snippet invs "inverse" iA
+^{-1}
+endsnippet
+
+context "latex()"
+snippet compl "complement" iA
+^{c}
+endsnippet
+
+context "latex()"
+snippet \\\ "setminus" iA
+\setminus
+endsnippet
+
+snippet >> ">>" iA
+\gg
+endsnippet
+
+snippet << "<<" iA
+\ll
+endsnippet
+
+snippet ~~ "~" iA
+\sim
+endsnippet
+
+context "latex()"
+snippet set "set" wA
+\\{$1\\} $0
+endsnippet
+
+snippet || "mid" iA
+ \mid
+endsnippet
+
+context "latex()"
+snippet cc "subset" Ai
+\subset
+endsnippet
+
+snippet notin "not in " iA
+\not\in
+endsnippet
+
+context "latex()"
+snippet inn "in " iA
+\in
+endsnippet
+
+snippet NN "n" iA
+\N
+endsnippet
+
+context "latex()"
+snippet Nn "cap" iA
+\cap
+endsnippet
+
+context "latex()"
+snippet UU "cup" iA
+\cup
+endsnippet
+
+context "latex()"
+snippet uuu "bigcup" iA
+\bigcup_{${1:i \in ${2: I}}} $0
+endsnippet
+
+context "latex()"
+snippet nnn "bigcap" iA
+\bigcap_{${1:i \in ${2: I}}} $0
+endsnippet
+
+snippet OO "emptyset" iA
+\O
+endsnippet
+
+snippet RR "real" iA
+\mathbb{R}
+endsnippet
+
+snippet QQ "Q" iA
+\mathbb{Q}
+endsnippet
+
+snippet ZZ "Z" iA
+\mathbb{Z}
+endsnippet
+
+snippet <! "normal" iA
+\triangleleft
+endsnippet
+
+snippet <> "hokje" iA
+\diamond
+endsnippet
+
+context "latex()"
+snippet tt "text" iA
+\text{$1}$0
+endsnippet
+
+context "latex()"
+snippet SI "SI" iA
+\SI{$1}{$2}
+endsnippet
+
+context "latex()"
+snippet bigfun "Big function" iA
+\begin{align*}
+	$1: $2 &\longrightarrow $3 \\\\
+	$4 &\longmapsto $1($4) = $0
+.\end{align*}
+endsnippet
+
+snippet cvec "column vector" iA
+\begin{pmatrix} ${1:x}_${2:1}\\\\ \vdots\\\\ $1_${2:n} \end{pmatrix}
+endsnippet
+
+priority 10
+context "latex()"
+snippet "bar" "bar" riA
+\overline{$1}$0
+endsnippet
+
+priority 100
+context "latex()"
+snippet "([a-zA-Z])bar" "bar" riA
+\overline{`!p snip.rv=match.group(1)`}
+endsnippet
+
+priority 10
+context "latex()"
+snippet "hat" "hat" riA
+\hat{$1}$0
+endsnippet
+
+priority 100
+context "latex()"
+snippet "([a-zA-Z])hat" "hat" riA
+\hat{`!p snip.rv=match.group(1)`}
+endsnippet
+
+snippet letw "let omega" iA
+Let $\Omega \subset \C$ be open.
+endsnippet
+
+snippet HH "H" iA
+\mathbb{H}
+endsnippet
+
+snippet DD "D" iA
+\mathbb{D}
+endsnippet
+
+## Markdown snippets
+priority 2000
+snippet h1 "Header h1" b
+# $0
+endsnippet
+snippet h2 "Header h2" b
+## $0
+endsnippet
+snippet h3 "Header h3" b
+### $0
+endsnippet
+snippet h4 "Header h4" b
+#### $0
+endsnippet
+snippet h5 "Header h5" b
+##### $0
+endsnippet
+snippet h6 "Header h6" b
+###### $0
+endsnippet
+
+context "not_latex()"
+snippet NOTE "Add a note" b
+> #### Note:
+> ${1:VISUAL/\n/\n\\ }
+endsnippet

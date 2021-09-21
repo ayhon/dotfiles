@@ -164,7 +164,7 @@ setup(){
 			goal_msg "Configuring vim..."
 			dependencies "vim"
 			stow -Sd $DOTFILES_DIR -t $HOME vim
-			[ -f "~/.vim/autoload/plug.vim"] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+			[ -f "~/.vim/autoload/plug.vim" ] || curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 				    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 			;;
 
@@ -176,8 +176,14 @@ setup(){
 			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \
 				|| curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim \
 				--create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-			;;
 
+			goal_msg "Enable vim UltiSnips snippets from within nvim"
+			local vim_ultisnips_dir="$DOTFILES_DIR/vim/.vim/UltiSnips" 
+			local nvim_ultisnips_dir="$DOTFILES_DIR/nvim/.config/nvim/UltiSnips"
+			[ -d "$nvim_ultisnips_dir" ] && rmdir "$nvim_ultisnips_dir"
+			ln -s "$vim_ultisnips_dir" "$nvim_ultisnips_dir"
+
+			;;
 		"tmux")
 			goal_msg "Configuring tmux..."
 			dependencies "tmux"
