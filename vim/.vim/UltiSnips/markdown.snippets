@@ -68,7 +68,7 @@ snippet '^.*\)/' "() frac" wrA
 `!p
 stripped = match.string[:-1] # Quitamos el / al final, no )
 depth = 0 # Siempre es 1 tras la primera iteración por ↑
-i = len(stripped) - 1→c
+i = len(stripped) - 1
 while True:
 	if stripped[i] == ')': depth += 1
 	if stripped[i] == '(': depth -= 1
@@ -78,6 +78,28 @@ snip.rv = stripped[0:i] + "\\frac{" + stripped[i+1:-1] + "}"
 `{$1}$0
 endsnippet
 
+priority 100
+snippet h1 "Header h1" bA
+# 
+endsnippet
+snippet h2 "Header h2" bA
+## 
+endsnippet
+snippet h3 "Header h3" bA
+### 
+endsnippet
+snippet h4 "Header h4" bA
+#### 
+endsnippet
+snippet h5 "Header h5" bA
+##### 
+endsnippet
+snippet h6 "Header h6" bA
+###### 
+endsnippet
+
+priority 0
+context "latex()"
 snippet '([A-Za-z])(\d)' "auto subscript" wrA
 `!p contextualized(match.group(1)+"_"+match.group(2))`
 endsnippet
@@ -85,6 +107,10 @@ endsnippet
 context "latex()"
 snippet '([A-Za-z])_(\d\d)' "auto subscript2" wrA
 `!p snip.rv = match.group(1)`_{`!p snip.rv = match.group(2)`}
+endsnippet
+
+snippet '([A-Za-z])^(\d\d)' "auto superscript2" wrA
+`!p contextualized(match.group(1)+"^{"+match.group(2))`}
 endsnippet
 
 snippet sympy "sympyblock " w
@@ -318,12 +344,13 @@ endsnippet
 
 context "latex()"
 snippet xx "cross" iA
-\times
+\times 
 endsnippet
 
+context "latex()"
 priority 100
 snippet ** "cdot" iA
-\cdot
+\cdot 
 endsnippet
 
 context "latex()"
@@ -527,29 +554,16 @@ snippet DD "D" iA
 \mathbb{D}
 endsnippet
 
-## Markdown snippets
-priority 2000
-snippet h1 "Header h1" b
-# $0
-endsnippet
-snippet h2 "Header h2" b
-## $0
-endsnippet
-snippet h3 "Header h3" b
-### $0
-endsnippet
-snippet h4 "Header h4" b
-#### $0
-endsnippet
-snippet h5 "Header h5" b
-##### $0
-endsnippet
-snippet h6 "Header h6" b
-###### $0
-endsnippet
 
 context "not_latex()"
 snippet NOTE "Add a note" b
 > #### Note:
 > ${1:VISUAL/\n/\n\\ }
+endsnippet
+# Make it work like the sympy script ?
+
+snippet C "Code snippet" b
+\`\`\`${1:lang}
+$2
+\`\`\`
 endsnippet

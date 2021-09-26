@@ -92,6 +92,7 @@ if has('nvim-0.5')
 	Plug 'nvim-lua/completion-nvim'
 	Plug 'ray-x/lsp_signature.nvim'
 	Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+	Plug 'scalameta/nvim-metals'
 	" Plug 'nvim-lua/plenary.nvim'
 	" Plug 'lewis6991/gitsigns.nvim'
 endif
@@ -127,9 +128,9 @@ let g:ale_fixers = [
       \ ]
 "}}}
 " ultisnips {{{
-let g:UltiSnipsExpandTrigger='<tab>'
-let g:UltiSnipsJumpForwardTrigger='<tab>'
-let g:UltiSnipsJumpBackwardTrigger='<s-tab>'
+" let g:UltiSnipsExpandTrigger='<tab>'
+" let g:UltiSnipsJumpForwardTrigger='<tab>'
+" let g:UltiSnipsJumpBackwardTrigger='<s-tab>'
 let g:UltiSnipsEditSplit="horizontal"
 "}}}
 " vimtex {{{
@@ -153,11 +154,18 @@ let g:lightline = {
 let g:lovedocs_colors = 'guifg=#E2BE6E ctermfg=159' "https://jonasjacek.github.io/colors/
 "}}}
 " vim-markdown {{{
+" native plugin {{{
 " let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua']
 let g:markdown_fenced_languages = [ 'cpp', 'python', 'r', 'lua', 'java', 'javascript', 'html', 'css', 'haskell']
+"}}}
+" plasticboy's version {{{
 let g:vim_markdown_math = 1
 let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_folding_disabled = 1
 "}}}
+"}}}
+" markdown-preview {{{
+" }}}
 " vim-tmux-navigator {{{
 let g:tmux_navigator_no_mappings = 1
 
@@ -209,6 +217,8 @@ nnoremap <Leader>! :q!<CR>
 " nnoremap <leader>H :set rnu! nu!<CR>
 nnoremap <leader>s :set spell!<CR>
 nnoremap <leader>t :term<CR><C-W>J<C-W>5_ python && exit<CR><C-L>
+nnoremap <leader>ue :UltiSnipsEdit<CR>
+nnoremap <silent> ñ :silent !xdg-open <cWORD><CR>
 
 nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
 "  Practical Vim's ↑ (Tip 81)
@@ -217,6 +227,7 @@ nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
 
 " Use <C-space> for omnifunc in insert mode
 inoremap <C-space> <C-x><C-o>
+inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 
 let s:hidden_all = 0
 function! ToggleHiddenAll()
