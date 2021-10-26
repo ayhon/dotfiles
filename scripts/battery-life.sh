@@ -53,7 +53,7 @@ get_battery_icon(){
 get_battery_fg(){
 	local ptg="$(get_battery_percentage)"
 	local state="$(get_battery_state)"
-	if [ $state == "charging" ]; then
+	if [ $state != "discharging" ]; then
 		echo "$charging_color"
 	elif [ $ptg -lt 10 ]; then
 		echo "$worst"
