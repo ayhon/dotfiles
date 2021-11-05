@@ -30,7 +30,7 @@ endglobal
 priority 100
 context "latex()"
 snippet ... "ldots" iA
-\ldots
+\ldots 
 endsnippet
 
 context "latex()"
@@ -101,7 +101,7 @@ endsnippet
 priority 0
 context "latex()"
 snippet '([A-Za-z])(\d)' "auto subscript" wrA
-`!p contextualized(match.group(1)+"_"+match.group(2))`
+`!p match.group(1)+"_"+match.group(2)`
 endsnippet
 
 context "latex()"
@@ -152,7 +152,7 @@ snippet == "equals" iA
 endsnippet
 
 snippet != "equals" iA
-`!p contextualized("\\neq")`
+`!p contextualized("\\neq")` 
 endsnippet
 
 context "latex()"
@@ -163,6 +163,14 @@ endsnippet
 context "latex()"
 snippet floor "floor" iA
 \left\lfloor $1 \right\rfloor$0
+endsnippet
+
+context "latex()"
+snippet cases "environment" A
+\begin{cases}
+$1
+\end{cases}
+$0
 endsnippet
 
 context "latex()"
@@ -271,21 +279,21 @@ snippet rij "mrij" i
 endsnippet
 
 snippet <= "leq" iA
-`!p contextualized("\\le")`
+`!p contextualized("\\le")` 
 endsnippet
 
 snippet >= "geq" iA
-`!p contextualized("\\ge")`
+`!p contextualized("\\ge")` 
 endsnippet
 
 context "latex()"
 snippet EE "geq" iA
-\exists
+\exists 
 endsnippet
 
 context "latex()"
 snippet AA "forall" iA
-\forall
+\forall 
 endsnippet
 
 context "latex()"
@@ -339,7 +347,7 @@ endsnippet
 
 context "latex()"
 snippet nabl "nabla" iA
-\nabla
+\nabla 
 endsnippet
 
 context "latex()"
@@ -360,8 +368,8 @@ endsnippet
 
 priority 100
 context "latex()"
-snippet '(?<!\\)(sin|cos|arccot|cot|csc|ln|log|exp|star|perp)' "ln" rwA
-\\`!p snip.rv = match.group(1)`
+snippet '(?<!\\)(sin|cos|arccot|cot|csc|ln|log|exp|star|perp|sigma)' "ln" rwA
+\\`!p snip.rv = match.group(1)` 
 endsnippet
 
 priority 300
@@ -373,18 +381,18 @@ endsnippet
 priority 200
 context "latex()"
 snippet '(?<!\\)(arcsin|arccos|arctan|arccot|arccsc|arcsec|pi|zeta|int)' "ln" rwA
-\\`!p snip.rv = match.group(1)`
+\\`!p snip.rv = match.group(1)` 
 endsnippet
 
 priority 100
 context "latex()"
 snippet -> "to" iA
-\to
+\to 
 endsnippet
 
 context "latex()"
 snippet → "to" iA
-\to
+\to 
 endsnippet
 
 priority 200
@@ -430,8 +438,9 @@ snippet set "set" wA
 \\{$1\\} $0
 endsnippet
 
+context "latex()"
 snippet || "mid" iA
- \mid
+\mid 
 endsnippet
 
 context "latex()"
@@ -448,9 +457,6 @@ snippet inn "in " iA
 \in
 endsnippet
 
-snippet NN "n" iA
-\N
-endsnippet
 
 context "latex()"
 snippet Nn "cap" iA
@@ -473,7 +479,11 @@ snippet nnn "bigcap" iA
 endsnippet
 
 snippet OO "emptyset" iA
-\O
+\empty
+endsnippet
+
+snippet NN "n" iA
+\mathbb{N}
 endsnippet
 
 snippet RR "real" iA
@@ -530,6 +540,29 @@ snippet "([a-zA-Z])bar" "bar" riA
 \overline{`!p snip.rv=match.group(1)`}
 endsnippet
 
+priority 100
+context "latex()"
+snippet "([a-zA-Z])tilde" "tilde" riA
+\tilde{`!p snip.rv=match.group(1)`}
+endsnippet
+
+priority 100
+context "latex()"
+snippet "([a-zA-Z])~" "tilde" riA
+\tilde{`!p snip.rv=match.group(1)`}
+endsnippet
+
+context "latex()"
+snippet "([a-zA-Z])dot" "dot" riA
+\dot{`!p snip.rv=match.group(1)`}
+endsnippet
+
+priority 200
+context "latex()"
+snippet "([a-zA-Z])ddot" "ddot" riA
+\ddot{`!p snip.rv=match.group(1)`}
+endsnippet
+
 priority 10
 context "latex()"
 snippet "hat" "hat" riA
@@ -540,6 +573,12 @@ priority 100
 context "latex()"
 snippet "([a-zA-Z])hat" "hat" riA
 \hat{`!p snip.rv=match.group(1)`}
+endsnippet
+
+context "latex()"
+priority 1000
+snippet "([a-z0])→" "Vector" riA
+\vec{`!p snip.rv=match.group(1)`}
 endsnippet
 
 snippet letw "let omega" iA
@@ -562,8 +601,93 @@ snippet NOTE "Add a note" b
 endsnippet
 # Make it work like the sympy script ?
 
-snippet C "Code snippet" b
+snippet c "Code snippet" b
 \`\`\`${1:lang}
 $2
 \`\`\`
+endsnippet
+
+snippet Exercise "Exercise" b
+#### Exercise
+##### Prompt
+$1
+##### Solution
+endsnippet
+
+priority 1
+snippet deriv "Derivative" i
+\frac{d $1}{d $2}
+endsnippet
+
+priority 2
+snippet pderiv "Partial derivative" i
+\frac{\delta $1}{\delta $2}
+endsnippet
+
+snippet m "Start math" b
+$$
+$1
+$$
+endsnippet
+
+priority 1000
+snippet '([A-Za-z])mppi' "Moore-Penrose pseudo-inverse" wrA
+`!p snip.rv = match.group(1)+"^†"`
+endsnippet
+
+context "latex()"
+priority 1000
+snippet ^( "Exponenciacion con paréntesis" ie
+^{($1}$0
+endsnippet
+
+context "latex()"
+priority 1000
+snippet ⁽ "Exponenciacion con paréntesis" ie
+^{($1}$0
+endsnippet
+
+priority 1000
+snippet ^^ "Exponenciación" iA
+^{$1}$0
+endsnippet
+
+context "latex()"
+snippet inc "Increment" wA
+\Delta 
+endsnippet
+
+context "latex()"
+snippet eps "epsilon"
+\epsilon 
+endsnippet
+
+context "latex()"
+snippet dlt "delta"
+\delta  
+endsnippet
+
+context "latex()"
+snippet txt "Add text" iA
+\text{$1}
+endsnippet
+
+context "latex()"
+snippet min "mininum" i
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{min}
+endsnippet
+
+context "latex()"
+snippet infim "infimum" i
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{inf}
+endsnippet
+
+context "latex()"
+snippet max "maximum" i
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{max}
+endsnippet
+
+context "latex()"
+snippet suprem "supremum" i
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{sup}
 endsnippet

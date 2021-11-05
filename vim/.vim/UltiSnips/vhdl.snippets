@@ -1,0 +1,125 @@
+snippet process "Process"
+$2process (${1:all}) is
+begin
+  ${3:...}
+end process;
+endsnippet
+
+snippet ieee "Usual IEEE import"
+--=============================================================================
+-- @file `!p snip.rv = fn`
+--=============================================================================
+-- Standard library
+library ieee;
+-- Standard packages
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+endsnippet
+
+snippet port
+port (
+  $1
+);
+endsnippet
+
+snippet in
+${1:name} : in ${2:type}
+endsnippet
+
+snippet out
+${1:name} : out ${2:type}
+endsnippet
+
+snippet entity
+entity ${1:name} is
+  ${2:generic (
+    ${3:...}
+  );
+  }${4:port (
+    ${5:...}
+  );
+  }
+end $1;
+endsnippet
+
+snippet arch
+architecture ${2:rtl} $1 is
+  $3
+begin
+  $4
+end $1;
+endsnippet
+
+snippet enum
+type ${1:type name} is (${2:values});
+endsnippet
+
+snippet signal
+signal ${1:signals} : ${2:type};
+endsnippet
+
+snippet comp
+component ${1:name} is
+  ${2:generic (
+    ${3:...}
+  );
+  }
+  ${4:port (
+    ${5:...}
+  );
+  }
+end component;
+endsnippet
+
+snippet instcomp "Instantiate a component"
+$2${1:component name}
+${3:generic map (
+  ${4:port_name} => ${5:port_signal},$6
+)
+}${7:port map (
+  ${8:port_name} => ${9:port_signal},$10
+)};
+endsnippet
+
+snippet array
+type ${1:type name} is array (${2:a} ${4:downto} ${3:b}) of ${5:base type};
+endsnippet
+
+snippet const
+constant ${1:name} : ${2:type} := ${3:expression};
+endsnippet
+
+snippet if
+if ${1:condition} then
+  $2
+${3:elsif ${4:condition} then
+  $5}
+${6:else}
+  $7
+end if;
+endsnippet
+
+snippet elsif
+elsif ${1:condition} then
+  $2
+endsnippet
+
+snippet select
+with ${1:signal} select
+  ${2:signal name} <=
+    ${3:expresion} when ${4:constant},$5
+    ${6:expresion} when others;
+endsnippet
+
+snippet when
+${1:expresion} when ${2: condition} else
+endsnippet
+
+snippet case
+case ${1:expression} is
+  when ${2:value} =>
+    ${3:statement};$4
+  when others =>
+    ${5:statement};
+end case;
+endsnippet
