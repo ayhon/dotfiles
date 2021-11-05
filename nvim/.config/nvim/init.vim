@@ -3,11 +3,52 @@ source ~/.vim/vimrc
 if has('nvim-0.5') " Surrounds this whole section
 lua << EOF
 	local util = require'lspconfig/util'
+	local lspconfig = require'lspconfig'
 
-	-- completion.nvim settings {{{
-	vim.cmd('let g:completion_enable_auto_popup = 0')
-	vim.cmd('let g:completion_enable_auto_signature = 0')
-	vim.api.nvim_set_keymap('i', '<C-p>', '<Plug>(completion_trigger)', {silent = true})
+	-- nvim-cmp settings {{{
+	local cmp = require'cmp'
+	cmp.setup{
+		snippet = {
+			expand = function(args)
+				vim.fn["UltiSnips#Anon"](args.body)
+			end,
+		},
+		mapping = {
+  		    ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+  		    ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+			['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), {'i','c'}),
+			['<C-y>'] = cmp.config.disable,
+			['<C-e>'] = cmp.mapping{
+				i = cmp.mapping.abort(),
+				c = cmp.mapping.close(),
+			},
+			['<Tab>'] = function(fallback)
+				if cmp.visible() then
+					cmp.confirm({ select = true });
+				else 
+					fallback()
+				end
+			end,
+		},
+		sources = cmp.config.sources{
+			-- Serious autocompletes
+			{ name = 'nvim_lsp' },
+			{ name = 'buffer' },
+			{ name = 'path' },
+	
+			-- Joke-ish autocompletes
+			{ name = 'ultisnips' },
+			{ name = 'calc' },
+			{ name = 'nvim_lua'}
+		},
+		completion = {
+			autocomplete = false
+		}
+	}
+
+	local capabilities = require('cmp_nvim_lsp').update_capabilities(
+		vim.lsp.protocol.make_client_capabilities()
+	)
 	-- }}}
 	-- lsp-signature settings {{{
 	lsp_signature_settings = {
@@ -21,7 +62,7 @@ lua << EOF
 		floating_window = false, -- show hint in a floating window, set to false for virtual text only mode
 		fix_pos = false,  -- set to true, the floating window will not auto-close until finish all parameters
 		hint_enable = true, -- virtual hint enable
-		hint_prefix = "🐼 ",  -- Panda for parameter
+		hint_prefix = "⧁ ",-- "💭🐼ᐅ ",  -- Panda for parameter
 		hint_scheme = "String",
 		use_lspsaga = false,  -- set to true if you want to use lspsaga popup
 		hi_parameter = "Search", -- how your parameter will be highlight
@@ -62,39 +103,13 @@ lua << EOF
 		vim.api.nvim_buf_set_option(0, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
 		-- For plugins with an `on_attach` callback, they are called here
-		require'completion'.on_attach()
+		-- require'completion'.on_attach()
 		require'lsp_signature'.on_attach(lsp_signature_settings)
 	end
 
 	-- Python completion options {{{
 	require'lspconfig'.pyright.setup{
-		cmd = {'/home/ayhon/.npm/_npx/3699d080662ea149/node_modules/.bin/pyright-langserver', '--stdio'},
-	    --        cmd = {'~/.npm/_npx/3699d080662ea149/node_modules/.bin/pyright-langserver', '--stdio'},
-		filetypes = {"python"},
-		root_dir = util.root_pattern(".git", "setup.py",  "setup.cfg", "pyproject.toml", "requirements.txt"),
-		settings = {
-			python = {
-				analysis = {
-					autoSearchPaths = true,
-					useLibraryCodeForTypes = true,
-				},
-			},
-		}
-		--cmd = { "pyright" },
-		--filetypes = { "python" },
-		--root_dir = function(filename)
-			  --return util.root_pattern(unpack(root_files))(filename) or
-					 --util.path.dirname(filename)
-			--end;
-		--settings = {
-		  --python = {
-			--analysis = {
-			  --autoSearchPaths = true,
-			  --diagnosticMode = "workspace",
-			  --useLibraryCodeForTypes = true,
-			--}
-		  --}
-		--}
+		capabilities = capabilities
 	}
 	-- }}}
 	-- Lua completion options {{{
@@ -137,13 +152,14 @@ lua << EOF
 				},
 			}
 		},
-		on_attach = custom_lsp_attach
+		on_attach = custom_lsp_attach,
+		capabilities = capabilities,
 	}
 	-- }}}
-	-- C/C++ completin options {{{
+	-- C completion options with ccls {{{
 	require'lspconfig'.ccls.setup{
 		cmd = { "ccls" },
-		filetypes = { "c", "cpp" },
+		filetypes = { "c", },
 		root_dir = util.root_pattern("compile_commands.json", "compile_flags.txt", ".git") or vim.fn.getcwd(),
 		root_dir = function(fname)
 			return util.root_pattern("compile_commands.json", "compile_flags.txt", ".git")(fname) or util.path.dirname(fname)
@@ -157,14 +173,44 @@ lua << EOF
 				excludeArgs = {"-frounding-math"}
 			}
 		},
+	    capabilities = capabilities,
 	}
 	--}}}
+	-- C++ completion options with clangd {{{
+	require'lspconfig'.clangd.setup{
+	    capabilities = capabilities,
+	}
+	-- }}}
+	-- VHDL completion options {{{
+	if not lspconfig.rust_hdl then
+	  require'lspconfig/configs'.rust_hdl = {
+		default_config = {
+		  cmd = {"vhdl_ls"};
+		  filetypes = { "vhdl", "vhd", "hdl"};
+		  root_dir = function(fname)
+			return util.root_pattern('vhdl_ls.toml')(fname)
+		  end;
+
+		  settings = {};
+		};
+	  }
+	end
+	lspconfig.rust_hdl.setup{
+	    capabilities = capabilities,
+	}
+	-- }}}
 	-- }}}
 EOF
 endif
 " }}}
 " mappings {{{
 tnoremap <A-c> <C-\><C-N>
+
+tnoremap <A-h> <C-\><C-N><A-h>
+tnoremap <A-j> <C-\><C-N><A-j>
+tnoremap <A-k> <C-\><C-N><A-k>
+tnoremap <A-l> <C-\><C-N><A-l>
+
 nnoremap <leader>tp :sp term://ipython3<CR><C-L>A
 nnoremap <leader>tl :sp term://lua<CR>A
 " }}}

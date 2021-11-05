@@ -56,8 +56,8 @@ endif
 " vim-plug {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+	  \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+	autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 call plug#begin('~/.vim/plugged')
@@ -65,16 +65,18 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'	"Enable better multi file switching
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-vinegar'
 "Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
 Plug 'flazz/vim-colorschemes'
 Plug 'itchyny/lightline.vim'
+Plug 'markonm/traces.vim'
 "Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
 "Plug 'junegunn/goyo.vim'
 Plug 'lervag/vimtex' ", {'do': 'notify-send \"Dependencies\" \"Install latexmk\"',}
 Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
 "Plug 'vim/killersheep'
 "Plug 'ycm-core/YouCompleteMe'
-Plug 'ap/vim-css-color'
+Plug 'ap/vim-css-color', { 'for': ['css']}
 Plug 'mattn/emmet-vim', { 'for': ['js','jsx','ts','tsx','html']}
 "Plug 'leafgarland/typescript-vim'
 "Plug 'HerringtonDarkholme/yats.vim'
@@ -87,14 +89,37 @@ Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
 Plug 'Twinside/vim-haskellConceal', {'for': ['haskell']}
 Plug 'psliwka/vim-smoothie'
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'JuliaEditorSupport/julia-vim'
+
+Plug 'bhurlow/vim-parinfer'
+Plug 'elkowar/yuck.vim'
+
+Plug 'markonm/traces.vim'
+
 if has('nvim-0.5') 
 	Plug 'neovim/nvim-lspconfig' 
-	Plug 'nvim-lua/completion-nvim'
+	Plug 'williamboman/nvim-lsp-installer'
+
+	" nvim-cmp and sources {{{
+	Plug 'hrsh7th/nvim-cmp'
+	" sources:
+	Plug 'hrsh7th/cmp-nvim-lsp'
+	Plug 'hrsh7th/cmp-buffer'
+	Plug 'hrsh7th/cmp-path'
+
+	Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+	Plug 'hrsh7th/cmp-calc'
+	Plug 'hrsh7th/cmp-nvim-lua'
+	" }}}
+
 	Plug 'ray-x/lsp_signature.nvim'
 	Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 	Plug 'scalameta/nvim-metals'
 	" Plug 'nvim-lua/plenary.nvim'
 	" Plug 'lewis6991/gitsigns.nvim'
+endif
+if has('nvim-0.6') 
+	Plug 'github/copilot.vim'
 endif
 call plug#end()
 "}}}
@@ -117,15 +142,15 @@ let g:fzf_colors =
 "}}}
 " ale {{{
 let g:ale_linters = {
-      \  'cs':['syntax', 'semantic', 'issues'],
-      \  'python': ['pylint'],
-      \  'java': ['eclipselsp'],
-      \ }
+	  \  'cs':['syntax', 'semantic', 'issues'],
+	  \  'python': ['pylint'],
+	  \  'java': ['eclipselsp'],
+	  \ }
 " \  'java' : ['eslint'],
 let g:ale_fixers = [
 	  \  'google_java_format',
-      \  'astyle',
-      \ ]
+	  \  'astyle',
+	  \ ]
 "}}}
 " ultisnips {{{
 " let g:UltiSnipsExpandTrigger='<tab>'
@@ -165,6 +190,11 @@ let g:vim_markdown_folding_disabled = 1
 "}}}
 "}}}
 " markdown-preview {{{
+function! g:OpenURL(url)
+	echo a:url
+	execute 'silent' '!/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=epiphany org.gnome.Epiphany' shellescape(a:url) '&'
+endfunction
+let g:mkdp_browserfunc = 'OpenURL'
 " }}}
 " vim-tmux-navigator {{{
 let g:tmux_navigator_no_mappings = 1
@@ -176,11 +206,15 @@ function! SetNavigationWithinTMUX()
 	nnoremap <silent> <A-l> :TmuxNavigateRight<cr>
 endfunction
 " }}}
+" parinfer settings{{{
+  let g:vim_parinfer_globs = ['*.lisp','yuck']
+  let g:vim_parinfer_filetypes = ['lisp','yuck']
+" }}}
 "}}}
 "}}}
 " Vim settings {{{
 " Interface{{{
-colorscheme srcery-drk
+colorscheme jellyx
 " set number relativenumber "set hybrid numbers
 set laststatus=2 "status bar is shown even when in only one buffer
 set noerrorbells "disable beep on errors
@@ -207,6 +241,7 @@ set nrformats-=octal
 set mouse=a "enable mouse
 set completeopt=menu,menuone,noselect "list of options for completion
 set hidden "hide unused buffers instead of unloading them (Permits buffer switching without saving)
+set wildignore+=.gitkeep,node_modules/**
 "}}}
 "}}}
 " Mappings {{{
@@ -220,6 +255,18 @@ nnoremap <leader>t :term<CR><C-W>J<C-W>5_ python && exit<CR><C-L>
 nnoremap <leader>ue :UltiSnipsEdit<CR>
 nnoremap <silent> ñ :silent !xdg-open <cWORD><CR>
 
+" Quicklist mappings
+nnoremap <leader>qo :copen<CR>
+nnoremap <leader>qc :cclose<CR>
+nnoremap <leader>qn :cnext<CR>
+nnoremap <leader>qN :cprev<CR>
+
+" Locallist mappings
+nnoremap <leader>lo :lopen<CR>
+nnoremap <leader>lc :lclose<CR>
+nnoremap <leader>ln :cnext<CR>
+nnoremap <leader>lN :cprev<CR>
+
 nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
 "  Practical Vim's ↑ (Tip 81)
 "nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
@@ -231,23 +278,27 @@ inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 
 let s:hidden_all = 0
 function! ToggleHiddenAll()
-	call ToggleModalHybridNumbers()
-	if s:hidden_all  == 0
-		let s:hidden_all = 1
-		set noshowmode
-		set noruler
-		set laststatus=0
-		set noshowcmd
-	else
-		let s:hidden_all = 0
-		set showmode
-		set ruler
-		set laststatus=2
-		set showcmd
-	endif
+call ToggleModalHybridNumbers()
+if s:hidden_all  == 0
+	let s:hidden_all = 1
+	set noshowmode
+	set noruler
+	set laststatus=0
+	set noshowcmd
+else
+	let s:hidden_all = 0
+	set showmode
+	set ruler
+	set laststatus=2
+	set showcmd
+endif
 endfunction
 
 nnoremap <silent> <A-S-z> :call ToggleHiddenAll()<CR>
+
+function! NetrwMappings()
+nmap <buffer> L <CR>
+endfunction
 
 " Buffer movement {{{
 nnoremap <C-N> :bprev<CR>
@@ -284,25 +335,33 @@ autocmd FileType cpp nnoremap <leader>c :w<CR>:!clear && g++ -g -o %< % && ./%< 
 
 " Switching between relative and nonrelative numbers between insert and normal mode
 function! ToggleModalHybridNumbers()
-	if !exists('#ModalHybridNumbers#InsertEnter')
-		set relativenumber number
-		augroup ModalHybridNumbers
-			autocmd!
+if !exists('#ModalHybridNumbers#InsertEnter')
+	set relativenumber number
+	augroup ModalHybridNumbers
+		autocmd!
 
-			autocmd InsertEnter * :setlocal norelativenumber
-			autocmd InsertLeave * :setlocal relativenumber
-		augroup END
-	else
-		set norelativenumber nonumber
-		augroup ModalHybridNumbers
-			autocmd!
-		augroup END
-	endif
+		autocmd InsertEnter * :setlocal norelativenumber
+		autocmd InsertLeave * :setlocal relativenumber
+	augroup END
+else
+	set norelativenumber nonumber
+	augroup ModalHybridNumbers
+		autocmd!
+	augroup END
+endif
 endfunction
 call ToggleModalHybridNumbers()
 call ToggleHiddenAll()
 
 nnoremap <silent> <A-S-x> :call ToggleModalHybridNumbers()<CR>
+
+" netrw mappings {{{
+augroup netrw_mapping
+autocmd!
+autocmd filetype netrw call NetrwMappings()
+augroup END
+" }}}
+
 
 
 " Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
