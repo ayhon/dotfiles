@@ -153,10 +153,10 @@ setup(){
 				mkdir -p "$GIT_DIR" 
 				cd  "$GIT_DIR"
 
-				if [ -d "$HOME/.ssh" ]; then
-					git clone "git@github.com:ayhon/dotfiles.git" "$DOTFILES_DIR"
-				fi
-				if [ ! -d "$DOTFILES_DIR" ]; the
+				[ -d "$HOME/.ssh" ] \
+					&& git clone "git@github.com:ayhon/dotfiles.git" "$DOTFILES_DIR"
+
+				if [ ! -d "$DOTFILES_DIR" ]; then
 					print_err "Coudn't clone dotfiles via ssh. Using https"
 
 					git clone "https://github.com/ayhon/dotfiles" "$DOTFILES_DIR"
