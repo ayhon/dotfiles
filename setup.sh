@@ -154,11 +154,12 @@ setup(){
 				cd  "$GIT_DIR"
 
 				if [ -d "$HOME/.ssh" ]; then
-					git clone "git@github.com:ayhon/dotfiles.git"
-				else
+					git clone "git@github.com:ayhon/dotfiles.git" "$DOTFILES_DIR"
+				fi
+				if [ ! -d "$DOTFILES_DIR" ]; the
 					print_err "Coudn't clone dotfiles via ssh. Using https"
 
-					git clone "https://github.com/ayhon/dotfiles"
+					git clone "https://github.com/ayhon/dotfiles" "$DOTFILES_DIR"
 					git remote set-url origin "git@github.com:ayhon/dotfiles.git" --push
 					goal_msg "Creating .ssh directory and needed files (Import your ssh keys later)"
 
@@ -326,6 +327,7 @@ setup(){
 			goal_msg "Enabling key-mapper.service"
 			sudo systemctl enable --now key-mapper
 			;;
+
 		"ssh")
 			print_err "Not implemented"
 			return 1
@@ -333,6 +335,24 @@ setup(){
 			eval "$(ssh-agent -s)"
 			ssh-add "$HOME/.ssh/ub_slab"
 			;;
+
+		"wezterm")
+			dependencies "curl jq" # TODO: Consider doing this without depending on `jq`
+			local bin_name="wezterm"
+
+			if ! which $bin_name >/dev/null 2>&1 && [ ! -f "$HOME/.local/bin/$bin_name" ]; then
+				local id=$(curl -s https://api.github.com/repos/wez/wezterm/releases/latest \
+					| jq ".. | .tag_name" 2>/dev/null)
+				local location="https://github.com/wez/wezterm/releases/download/$id/WezTerm-$id-Ubuntu16.04.AppImage"
+
+				curl -LO "$location" -o "$HOME/.local/bin/$bin_name"
+				chmod +x "$HOME/.local/bin/$bin_name"
+			fi
+
+			goal_msg "Configuring wezterm..."
+			stow -Svd $DOTFILES_DIR -t $HOME wezterm
+			;;
+
 		*)
 			print_err "Option not recognized: \"$1\""
 			usage
@@ -350,13 +370,14 @@ Options:
   -lv --load-variables  Exit after loading variables
 
 Targets:
-  init   - Basic conditions 
-  basic  - Install basic utilities
-  extra  - Install extra packages
-  vim    - Setup vim config
-  nvim   - Setup nvim config
-  decay  - Setup a decaying directory
-  fzf    - Setup fzf with shortcuts
+  init    - Basic conditions 
+  basic   - Install basic utilities
+  extra   - Install extra packages
+  vim     - Setup vim config
+  nvim    - Setup nvim config
+  decay   - Setup a decaying directory
+  fzf     - Setup fzf with shortcuts
+  wezterm - Setup wezterm
 EOF
 }
 is_argument(){
