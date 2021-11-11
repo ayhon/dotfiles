@@ -142,6 +142,13 @@ require'lspconfig'.clangd.setup {
 } -- }}}3
 -- }}}2
 -- }}}1
+-- Indent-blank line {{{1
+require'indent_blankline'.setup{
+	char = '|',
+	enabled = false,
+}
+v[[nnoremap <leader>il :IndentBlanklineToggle<CR>]]
+-- }}}1
 -- mappings {{{1
 v[[tnoremap <A-c> <C-\><C-N>]]
 
@@ -153,8 +160,16 @@ v[[tnoremap <A-l> <C-\><C-N><A-l>]]
 v[[nnoremap <leader>tp :sp term://ipython3<CR><C-L>A]]
 v[[nnoremap <leader>tl :sp term://lua<CR>A]]
 -- }}}1
+-- Autocommands {{{1
+
+v[[
+augroup lsp
+	au!
+	au FileType scala,sbt lua require("metals").initialize_or_attach({})
+augroup end]]
+-- }}}1
 --       ▗               ▗▀▖▗
 -- ▛▀▖▌ ▌▄ ▛▚▀▖ ▞▀▖▞▀▖▛▀▖▐  ▄ ▞▀▌
 -- ▌ ▌▐▐ ▐ ▌▐ ▌ ▌ ▖▌ ▌▌ ▌▜▀ ▐ ▚▄▌
 -- ▘ ▘ ▘ ▀▘▘▝ ▘ ▝▀ ▝▀ ▘ ▘▐  ▀▘▗▄▘
--- vim: set foldmethod=marker:
+-- vim: set foldmethod=marker path+=./lua:

@@ -90,7 +90,7 @@ inst(){
 		verbose_msg "Detected distribution: $distro_id"
 
 		case $distro_id in
-			"Pop_OS" | "Ubuntu")
+			"Pop_OS" | "Ubuntu" | *"Kali"*)
 				sudo apt-get update -y 
 				sudo apt-get upgrade -y
 				sudo apt-get install -y "$@"
@@ -107,6 +107,9 @@ inst(){
 			"Fedora")
 				sudo dnf upgrade
 				sudo dnf install -y "$@"
+				;;
+			*)
+				print_err "Sorry, \"$distro_id\" isn't supported yet"
 				;;
 			# TODO: Add more possibilities
 		esac
@@ -172,6 +175,10 @@ setup(){
 					touch "$HOME/.ssh/config"
 					chmod 600 "$HOME/.ssh/config"
 				fi
+			else
+				verbose_msg "Dotfiles repository found locally"
+				goal_msg "Pulling new changes from repository"
+				git pull
 			fi
 
 			goal_msg "Installing script"
@@ -192,9 +199,14 @@ setup(){
 			setup "vim"
 			dependencies "neovim"
 			stow -Svd $DOTFILES_DIR -t $HOME nvim
+
+			goal_msg "Setting up vim-plug for neovim"
 			[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/autoload/plug.vim" ] \
 				|| curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim \
 				--create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+			goal_msg "Setting up packer for neovim"
+			git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+ 				~/.local/share/nvim/site/pack/packer/start/packer.nvim
 
 			goal_msg "Enable vim UltiSnips snippets from within nvim"
 			local vim_ultisnips_dir="$DOTFILES_DIR/vim/.vim/UltiSnips" 
@@ -208,8 +220,8 @@ setup(){
 			[ -d "$nvim_after_syntax_dir" ] && rmdir "$nvim_after_syntax_dir"
 			mkdir -p "$(dirname $nvim_after_syntax_dir)"
 			ln -s "$vim_after_syntax_dir" "$nvim_after_syntax_dir"
-
 			;;
+
 		"tmux")
 			goal_msg "Configuring tmux..."
 			dependencies "tmux"

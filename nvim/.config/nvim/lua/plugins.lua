@@ -19,9 +19,10 @@ require'packer'.startup(function(use)
 	use 'hrsh7th/cmp-nvim-lua'
 	-- }}} }}}
 
+	use{'scalameta/nvim-metals', requires = { 'nvim-lua/plenary.nvim' }}
+
 	use 'ray-x/lsp_signature.nvim'
 	use{'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
-	use 'scalameta/nvim-metals'
 	use 'lukas-reineke/indent-blankline.nvim'
 
 	if vim.fn.has('nvim-0.6') then
