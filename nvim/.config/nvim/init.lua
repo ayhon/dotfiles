@@ -31,15 +31,9 @@ cmp.setup{
 			end,
 	}, -- }}}3
 	sources = cmp.config.sources{ -- {{{3
-		-- Serious autocompletes
 		{ name = 'nvim_lsp' },
-		{ name = 'buffer' },
-		{ name = 'path' },
-
-		-- Joke-ish autocompletes
-		{ name = 'ultisnips' },
-		{ name = 'calc' },
-		{ name = 'nvim_lua'}
+		{ name = 'nvim_lua' },
+		{ name = 'ultisnips'},
 	}, -- }}}3
 	completion = { -- {{{3
 		autocomplete = false
@@ -90,8 +84,6 @@ local custom_lsp_attach = function(_) -- _ == client
 	-- }}}4
 	api.nvim_buf_set_option(0,'omnifunc', 'v:lua.vim.lsp.omnifunc')
 	-- On-attach callbacks {{{4
-	-- Perhaps this is needed, if not just eleminate
-	-- require'lsp_signature'.on_attach(lsp_sign_settings)
 	-- }}}4
 end -- }}}3
 -- Python completion options {{{3
@@ -140,14 +132,82 @@ require'lspconfig'.sumneko_lua.setup{
 require'lspconfig'.clangd.setup {
 	capabilities = capabilities,
 } -- }}}3
+-- HDL completion options{{{3
+--[[
+-- Only define once
+if not require'lspconfig.configs'.hdl_checker then
+	require'lspconfig/configs'.hdl_checker = {
+		default_config = {
+			cmd = {"hdl_checker", "--lsp", };
+			filetypes = {"vhdl", "verilog", "systemverilog"};
+			root_dir = function(fname)
+				-- will look for a parent directory with a .git directory. If none, just
+				local util = require'lspconfig'.util
+				return util.root_pattern('.hdl_checker.config')(fname) or util.find_git_ancestor(fname) or util.path.dirname(fname)
+				-- or (not both)
+				-- Will look for the .hdl_checker.config file in a parent directory. If
+				-- none, will use the current directory
+				-- return lspconfig.util.root_pattern('.hdl_checker.config')(fname) or lspconfig.util.path.dirname(fname)
+			end;
+			settings = {};
+		};
+	}
+end
+--]]
+require'lspconfig'.hdl_checker.setup{}
+
+-- }}}3
+-- Haskell completion options {{{3
+local util = require 'lspconfig/util'
+local root_patterns = {"*.cabal", "stack.yaml", "cabal.project", "package.yaml", "hie.yaml"}
+require'lspconfig'.hls.setup{
+	root_dir = function(fname)
+		return util.root_pattern(table.unpack(root_patterns))(fname) or util.path.dirname(fname)
+	end,
+    capabilities = capabilities
+}
+-- }}}3
+-- Svelte completion options{{{3
+require'lspconfig'.svelte.setup{
+	capabilities = capabilities
+}
+-- }}}3
 -- }}}2
 -- }}}1
--- Indent-blank line {{{1
+-- plugin options {{{1
+-- venn.nvim {{{2
+-- venn.nvim: enable or disable keymappings
+function _G.Toggle_venn()
+    local venn_enabled = vim.inspect(vim.b.venn_enabled)
+    if venn_enabled == "nil" then
+        vim.b.venn_enabled = true
+        vim.cmd[[setlocal ve=all]]
+        -- draw a line on HJKL keystokes
+        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", {noremap = true})
+        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", {noremap = true})
+        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", {noremap = true})
+        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", {noremap = true})
+        -- draw a box by pressing "f" with visual selection
+        vim.api.nvim_buf_set_keymap(0, "v", "f", ":VBox<CR>", {noremap = true})
+    else
+        vim.cmd[[setlocal ve=]]
+        vim.cmd[[mapclear <buffer>]]
+        vim.b.venn_enabled = nil
+    end
+end
+-- toggle keymappings for venn using <leader>v
+vim.api.nvim_set_keymap('n', '<leader>v', ":lua Toggle_venn()<CR>", {noremap = true})
+-- }}}2
+-- Indent-blank line {{{2
 require'indent_blankline'.setup{
 	char = '|',
 	enabled = false,
 }
 v[[nnoremap <leader>il :IndentBlanklineToggle<CR>]]
+-- }}}2
+-- nvim-tree.lua {{{2
+-- require'nvim-tree'.setup{}
+-- }}}2
 -- }}}1
 -- mappings {{{1
 v[[tnoremap <A-c> <C-\><C-N>]]
@@ -157,10 +217,13 @@ v[[tnoremap <A-j> <C-\><C-N><A-j>]]
 v[[tnoremap <A-k> <C-\><C-N><A-k>]]
 v[[tnoremap <A-l> <C-\><C-N><A-l>]]
 
-v[[nnoremap <leader>tp :sp term://ipython3<CR><C-L>A]]
-v[[nnoremap <leader>tl :sp term://lua<CR>A]]
+v[[nnoremap <leader>tt :TroubleToggle<CR>]]
+v[[nnoremap gh :diffget //2<CR>]]
+v[[nnoremap gl :diffget //3<CR>]]
+
+v[[nnoremap gd :lua vim.lsp.buf.definition()<CR>]]
 -- }}}1
--- Autocommands {{{1
+-- autocommands {{{1
 
 v[[
 augroup lsp

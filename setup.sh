@@ -11,7 +11,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 DOTFILES_DIR="$GIT_DIR/dotfiles"
 CMD_NAME="setup"
 DATA_DIR_NAME="data"
-SAVED_DIRECTORIES="Desktop Documents Downloads Music Pictures Videos"
+SAVED_DIRECTORIES="Desktop Documents Downloads Music Pictures Videos Work"
 
 REQUIRED_PKGS="stow git curl"
 BASIC_PKGS="tmux neovim git unrar mpv pandoc tldr gdb fzf"
@@ -95,7 +95,7 @@ inst(){
 				sudo apt-get upgrade -y
 				sudo apt-get install -y "$@"
 				;;
-			"Arch Linux")
+			"Arch Linux"*)
 				sudo pacman -Syyuu
 				sudo pacman -S "$@"
 				;;
@@ -104,7 +104,7 @@ inst(){
 				sudo zypper up -y
 				sudo zypper in -y "$@"
 				;;
-			"Fedora")
+			"Fedora"*)
 				sudo dnf upgrade
 				sudo dnf install -y "$@"
 				;;
@@ -261,6 +261,62 @@ setup(){
 			# dependencies R python3 python whaaaaat
 			# print_err "End of testing"
 			echo "$@"
+			;;
+
+		"npm")
+			if [ ! -f "$HOME/.nvm/nvm.sh" ]; then
+				goal_msg "Installing nvm"
+				curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+				export NVM_DIR="$HOME/.nvm"
+				[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+				[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+			fi
+
+			goal_msg "Installing latest node version with nvm"
+			nvm install node
+			;;
+			
+		"yarn")
+			setup "npm"
+
+			goal_msg "Installing yarn"
+			npm i --global yarn
+			;;
+		"evremap")
+			dependencies "libevdev-devel"
+
+			evremap_dir="$GIT_DIR/evremap"
+
+			if [ -d "$evremap" ]; then
+				goal_msg "Cloning into wez/evremap"
+				git clone https://github.com/wez/evremap "$evremap_dir"
+			fi
+			
+			cd "$evremap_dir"
+			goal_msg "Building evremap"
+			cargo build --release
+
+			goal_msg "Loading configuration files"
+			stow -Svd $DOTFILES_DIR -t $HOME evremap
+
+			systemd_service_dir="/etc/systemd/system/"
+			if [ ! -f "$systemd_service_dir/evremap.service" ]; then
+				goal_msg "Installing systemd service"
+				cmd=$(echo "ExecStart=bash -c \"$evremap_dir/target/release/evremap remap $HOME/.config/evremap/remaps.toml\"" \
+					| sed 's/\//\\\//g')
+				cat "$evremap_dir/evremap.service" \
+					| sed 's/ExecStart.*/$cmd/g' > "$HOME/.config/evremap/evremap.service"
+				sudo ln -s "$HOME/.config/evremap/evremap.service" "$systemd_service_dir/evremap.service"
+			fi
+			
+			goal_msg "Enabling systemd service"
+			sudo systemctl daemon-reload
+			sudo systemctl enable --now evremap.service
+			;;
+
+		"gef")
+			dependencies "gdb"
+			wget -q -O- https://github.com/hugsy/gef/raw/master/scripts/gef.sh | sh
 			;;
 
 		"decay")
