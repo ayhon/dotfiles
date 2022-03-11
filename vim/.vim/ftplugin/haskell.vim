@@ -115,3 +115,4 @@ hi link hsNiceOperator Operator
 hi! link Conceal Operator
 setlocal conceallevel=2
 
+set et sw list

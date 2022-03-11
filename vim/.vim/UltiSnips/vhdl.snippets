@@ -43,11 +43,11 @@ end $1;
 endsnippet
 
 snippet arch
-architecture ${2:rtl} $1 is
+architecture ${2:rtl} of $1 is
   $3
 begin
   $4
-end $1;
+end $2;
 endsnippet
 
 snippet enum
@@ -112,7 +112,7 @@ with ${1:signal} select
 endsnippet
 
 snippet when
-${1:expresion} when ${2: condition} else
+${2:expresion} when ${1: condition} else
 endsnippet
 
 snippet case
@@ -122,4 +122,20 @@ case ${1:expression} is
   when others =>
     ${5:statement};
 end case;
+endsnippet
+
+snippet register
+$4process (${2:CLKxCI}, ${3:RSTxRI}) is
+begin
+  if $3 = '1' then
+    ${1:Data}xDP <= (others => '0');
+  elsif $2'event and $2 = '1' then
+    $1xDP <= $1xDN;
+  end if;
+end process;
+endsnippet
+
+snippet registers
+type ${4:register_type} is array (0 to ${2:#registers}-1) of std_logic_vector(${3:wordsize}-1 downto 0)
+signal ${1:registers}: $4;
 endsnippet

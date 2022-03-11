@@ -1,0 +1,18 @@
+snippet desc
+describe("$1", function()
+	local $1 = require "`!p 
+from os.path import abspath
+l = abspath(path).split("/")
+snip.rv = "/".join(l[(l.index("spec")+1):-1])+"/" `$1"
+	$0
+end)
+endsnippet
+snippet it
+it("$1", function()
+	$0
+end)
+endsnippet
+snippet "ret obj"
+self.__index = self
+return setmetatable(obj,self)
+endsnippet

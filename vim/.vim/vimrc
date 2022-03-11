@@ -63,11 +63,29 @@ endif
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'	"Enable better multi file switching
+Plug 'junegunn/goyo.vim'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-vinegar'
 "Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
 Plug 'flazz/vim-colorschemes'
+Plug 'jtadley/vim-qasm'
+
+Plug 'lambdalisue/nerdfont.vim'
+Plug 'lambdalisue/fern.vim'
+Plug 'lambdalisue/fern-hijack.vim'
+Plug 'lambdalisue/fern-renderer-nerdfont.vim'
+Plug 'yuki-yano/fern-preview.vim'
+
+" Plug 'sheerun/vim-polyglot'
+Plug 'bhurlow/vim-parinfer'
+Plug 'elkowar/yuck.vim'
+Plug 'JuliaEditorSupport/julia-vim'
+Plug 'leafo/moonscript-vim'
+Plug 'plasticboy/vim-markdown', { 'for' : ['markdown']}
+Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
+Plug 'evanleck/vim-svelte'
+
 Plug 'itchyny/lightline.vim'
 Plug 'markonm/traces.vim'
 "Plug 'dense-analysis/ale'			"https://github.com/dense-analysis/ale/wiki/Java
@@ -76,7 +94,7 @@ Plug 'lervag/vimtex' ", {'do': 'notify-send \"Dependencies\" \"Install latexmk\"
 Plug 'sirver/ultisnips'				"https://castel.dev/post/lecture-notes-1/
 "Plug 'vim/killersheep'
 "Plug 'ycm-core/YouCompleteMe'
-Plug 'ap/vim-css-color', { 'for': ['css']}
+Plug 'ap/vim-css-color'
 Plug 'mattn/emmet-vim', { 'for': ['js','jsx','ts','tsx','html']}
 "Plug 'leafgarland/typescript-vim'
 "Plug 'HerringtonDarkholme/yats.vim'
@@ -84,15 +102,9 @@ Plug 'mattn/emmet-vim', { 'for': ['js','jsx','ts','tsx','html']}
 " Plug 'aklt/plantuml-syntax'
 Plug 'davisdude/vim-love-docs', {'do': './gen.sh'}
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-Plug 'plasticboy/vim-markdown', { 'for' : ['markdown']}
-Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
 Plug 'Twinside/vim-haskellConceal', {'for': ['haskell']}
 Plug 'psliwka/vim-smoothie'
 Plug 'christoomey/vim-tmux-navigator'
-Plug 'JuliaEditorSupport/julia-vim'
-
-Plug 'bhurlow/vim-parinfer'
-Plug 'elkowar/yuck.vim'
 
 Plug 'markonm/traces.vim'
 call plug#end()
@@ -180,13 +192,29 @@ function! SetNavigationWithinTMUX()
 	nnoremap <silent> <A-l> :TmuxNavigateRight<cr>
 endfunction
 " }}}
-" parinfer settings{{{
+" parinfer {{{
   let g:vim_parinfer_globs = ['*.lisp','yuck']
   let g:vim_parinfer_filetypes = ['lisp','yuck']
 " }}}
+" fern.vim {{{
+let g:fern#renderer = 'nerdfont'
+function! s:fern_settings() abort
+  nmap <silent> <buffer> p     <Plug>(fern-action-preview:toggle)
+  nmap <silent> <buffer> <C-p> <Plug>(fern-action-preview:auto:toggle)
+  nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
+  nmap <silent> <buffer> <C-u> <Plug>(fern-action-preview:scroll:up:half)
+  nmap <silent> <buffer> - <Plug>(fern-action-leave)
+  nmap <silent> <buffer> + <Plug>(fern-action-mark)
+endfunction
+
+augroup fern-settings
+  autocmd!
+  autocmd FileType fern call s:fern_settings()
+augroup END
+" }}}
 "}}}
 "}}}
-" Vim settings {{{
+" Settings {{{
 " Interface{{{
 colorscheme jellyx
 " set number relativenumber "set hybrid numbers
@@ -196,6 +224,7 @@ set wildmenu "display command line's tab complete options as menu
 set incsearch "search the word as its written
 set hlsearch "highlight the words matched by pattern
 set termguicolors "enables true color in terminal. Uses cterm values
+set fillchars=eob:\ ,fold:\ 
 "}}}
 " Behaviour {{{
 set encoding=utf-8 "use encoding that supports unicode
@@ -216,6 +245,8 @@ set mouse=a "enable mouse
 set completeopt=menu,menuone,noselect "list of options for completion
 set hidden "hide unused buffers instead of unloading them (Permits buffer switching without saving)
 set wildignore+=.gitkeep,node_modules/**
+set autochdir
+" autocmd BufEnter * silent! lcd %:p:h
 "}}}
 "}}}
 " Mappings {{{

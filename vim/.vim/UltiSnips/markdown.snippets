@@ -362,13 +362,25 @@ snippet ** "cdot" iA
 endsnippet
 
 context "latex()"
-snippet norm "norm" iA
-\|$1\|$0
+snippet norm "norm" i
+\norm{$1}$0
 endsnippet
 
 priority 100
 context "latex()"
-snippet '(?<!\\)(sin|cos|arccot|cot|csc|ln|log|exp|star|perp|sigma)' "ln" rwA
+snippet '(?<!\\)(sin|cos|arccot|cot|csc|ln|log|exp|star|perp)' "ln" rwA
+\\`!p snip.rv = match.group(1)` 
+endsnippet
+
+priority 100
+context "latex()"
+snippet '(?<!\\)(alpha|beta|phi|xi|chi|gamma|lambda|epsilon|upsilon|pi|tau|mu|nu|theta)' "greek letters" rwA
+\\`!p snip.rv = match.group(1)` 
+endsnippet
+
+priority 100
+context "latex()"
+snippet '(?<!\\)(Alpha|Beta|Phi|Xi|Chi|Gamma|Lambda|Epsilon|Upsilon|Pi|Tau|Mu|Nu|Theta)' "greek Letters" rwA
 \\`!p snip.rv = match.group(1)` 
 endsnippet
 
@@ -674,20 +686,20 @@ endsnippet
 
 context "latex()"
 snippet min "mininum" i
-\underset{${1:n} ${2:\in ${3:\\{\\}}}}{min}
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{\min}
 endsnippet
 
 context "latex()"
 snippet infim "infimum" i
-\underset{${1:n} ${2:\in ${3:\\{\\}}}}{inf}
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{\inf}
 endsnippet
 
 context "latex()"
 snippet max "maximum" i
-\underset{${1:n} ${2:\in ${3:\\{\\}}}}{max}
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{\max}
 endsnippet
 
 context "latex()"
 snippet suprem "supremum" i
-\underset{${1:n} ${2:\in ${3:\\{\\}}}}{sup}
+\underset{${1:n} ${2:\in ${3:\\{\\}}}}{\sup}
 endsnippet
