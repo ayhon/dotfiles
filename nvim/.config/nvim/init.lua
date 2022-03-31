@@ -77,12 +77,15 @@ require 'nvim-treesitter.configs'.setup{
 -- }}}2
 -- nvim-lspconfig {{{2
 -- Custom attach function {{{3
-local custom_lsp_attach = function(_) -- _ == client
+local custom_lsp_attach = function(_, bufnr) -- _ == client
 	-- LSP mappings {{{4
-	api.nvim_buf_set_keymap(0,'n','K','<cmd>lua vim.lsp.buf.hover()<CR>', {noremap = true})
-	api.nvim_buf_set_keymap(0,'n','<C-]>','<cmd>lua vim.lsp.buf.definition()<CR>', {noremap = true})
+    print(bufnr)
+	local opts = { noremap=true, silent=true }
+	vim.api.nvim_buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+	vim.api.nvim_buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
 	-- }}}4
-	api.nvim_buf_set_option(0,'omnifunc', 'v:lua.vim.lsp.omnifunc')
+	local function option(...) vim.api.nvim_buf_set_option(bufnr,...) end
+	option('omnifunc', 'v:lua.vim.lsp.omnifunc')
 	-- On-attach callbacks {{{4
 	-- }}}4
 end -- }}}3
@@ -125,7 +128,7 @@ require'lspconfig'.sumneko_lua.setup{
 			}, -- }}}5
 		}, -- }}}4
 	},
-	on_attach = custom_lsp_attach,
+	-- on_attach = custom_lsp_attach,
 	capabilities = capabilities,
 } -- }}}3
 -- C/C++ completion options {{{3
@@ -172,6 +175,16 @@ require'lspconfig'.svelte.setup{
 	capabilities = capabilities
 }
 -- }}}3
+-- Solidity completion options 3{{{
+require'lspconfig'.solidity_ls.setup{
+	root_dir = function(fname)
+        return require'lspconfig'.util.find_git_ancestor(fname)
+          or require'lspconfig'.util.find_node_modules_ancestor(fname)
+          or require'lspconfig'.util.find_package_json_ancestor(fname)
+          or vim.loop.cwd()
+      end
+}
+-- }}}3
 -- }}}2
 -- }}}1
 -- plugin options {{{1
@@ -181,7 +194,7 @@ function _G.Toggle_venn()
     local venn_enabled = vim.inspect(vim.b.venn_enabled)
     if venn_enabled == "nil" then
         vim.b.venn_enabled = true
-        vim.cmd[[setlocal ve=all]]
+        vim.cmd[[setlocal virtualedit='all']]
         -- draw a line on HJKL keystokes
         vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", {noremap = true})
         vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", {noremap = true})
@@ -190,7 +203,7 @@ function _G.Toggle_venn()
         -- draw a box by pressing "f" with visual selection
         vim.api.nvim_buf_set_keymap(0, "v", "f", ":VBox<CR>", {noremap = true})
     else
-        vim.cmd[[setlocal ve=]]
+        vim.cmd[[setlocal virtualedit=]]
         vim.cmd[[mapclear <buffer>]]
         vim.b.venn_enabled = nil
     end
@@ -221,7 +234,22 @@ v[[nnoremap <leader>tt :TroubleToggle<CR>]]
 v[[nnoremap gh :diffget //2<CR>]]
 v[[nnoremap gl :diffget //3<CR>]]
 
-v[[nnoremap gd :lua vim.lsp.buf.definition()<CR>]]
+local function keymap(...) vim.api.nvim_set_keymap(...) end
+local opts = { noremap=true, silent=true }
+keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+keymap('n', '<space>r', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+keymap('n', '<space>a', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+keymap('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+keymap('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
+keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 -- }}}1
 -- autocommands {{{1
 
@@ -230,6 +258,17 @@ augroup lsp
 	au!
 	au FileType scala,sbt lua require("metals").initialize_or_attach({})
 augroup end]]
+-- }}}1
+-- Neovide settings {{{1
+if vim.g.neovide then
+    -- vim.g.smoothie_enabled = false
+    vim.g.neovide_cursor_animation_leght=0.13
+    vim.g.neovide_cursor_trail_length=0.8
+    vim.g.neovide_fullscreen=true
+    vim.g.neovide_cursor_vfx_mode = "sonicboom"
+    -- vim.g.neovide_cursor_vfx_mode = "railgun"
+end
+-- vim.g.neovide_
 -- }}}1
 --       ▗               ▗▀▖▗
 -- ▛▀▖▌ ▌▄ ▛▚▀▖ ▞▀▖▞▀▖▛▀▖▐  ▄ ▞▀▌
