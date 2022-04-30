@@ -1,9 +1,46 @@
--- Constants and aliases {{{1
+-- Constants, aliases and functions {{{1
 local v = vim.cmd
-local api = vim.api
 local set = vim.opt
-local keymap =  function (...) vim.api.nvim_set_keymap(...) end
-local buf_map = function (...) vim.api.nvim_buf_set_keymap(0,...) end
+local keymap_options = { noremap=true, silent=true }
+local keymap =  function(mode,shortcut,cmd) vim.api.nvim_set_keymap(      mode,shortcut,cmd,keymap_options) end
+local buf_map = function(mode,shortcut,cmd) vim.api.nvim_buf_set_keymap(0,mode,shortcut,cmd,keymap_options) end
+-- Autocommands setup {{{2
+local augroup = function(_) error "Only available in nvim-0.7+" end
+local autocmd = function(_,_,_,_) error "Only available in nvim-0.7+" end
+if vim.fn.has('nvim-0.7') then
+    --[[ USAGE [[
+    augroup 'AutoCmdName' {
+      autocmd('Event1', 'pattern1', function() ... end);
+      autocmd('Event2', 'pattern2', 'g:VimFunction');
+      autocmd('Event3', 'pattern3', '<Cmd>echom "Regular commands"');
+    }
+    --]]
+	autocmd = function (event,pattern,cmd)
+        if type(cmd) == 'function' or type(cmd) == 'table' or type(cmd) == 'string' and string.sub(cmd,1,2) == 'g:' then
+            return {event=event,opts = {pattern=pattern,callback=cmd}}
+        elseif type(cmd) == 'string' then
+            return {event=event,opts = {pattern=pattern,command=cmd}}
+        else
+            print("You cannot execute "..type(cmd))
+            vim.pretty_print(cmd)
+        end
+    end
+	augroup = function (name) return function(autocmds)
+        local group = vim.api.nvim_create_augroup(name,{clear=true})
+        for _, autocmd in ipairs(autocmds) do
+            autocmd.opts.group = group
+            vim.api.nvim_create_autocmd(autocmd.event, autocmd.opts)
+        end
+    end end
+end
+-- }}}2
+local function with_version(version) return function(yes, no)
+	if vim.fn.has('nvim-'..version) then
+		return yes
+	else
+		return no
+	end
+end end
 -- }}}1
 -- Settings {{{1
 -- nvim-lsp settings {{{2
@@ -81,10 +118,8 @@ require 'nvim-treesitter.configs'.setup{
 -- Custom attach function {{{4
 local custom_lsp_attach = function(_, bufnr) -- _ == client
 	-- LSP mappings {{{5
-    print(bufnr)
-	local opts = { noremap=true, silent=true }
-	vim.api.nvim_buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-	vim.api.nvim_buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+	buf_map('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>')
+	buf_map('n', 'K',  '<Cmd>lua vim.lsp.buf.hover()<CR>')
 	-- }}}5
 	local function option(...) vim.api.nvim_buf_set_option(bufnr,...) end
 	option('omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -166,10 +201,10 @@ require'lspconfig'.hdl_checker.setup{}
 local util = require 'lspconfig/util'
 local root_patterns = {"*.cabal", "stack.yaml", "cabal.project", "package.yaml", "hie.yaml"}
 require'lspconfig'.hls.setup{
-	root_dir = function(fname)
-		return util.root_pattern(table.unpack(root_patterns))(fname) or util.path.dirname(fname)
-	end,
-    capabilities = capabilities
+-- 	root_dir = function(fname)
+-- 		return util.root_pattern(table.unpack(root_patterns))(fname) or util.path.dirname(fname)
+-- 	end,
+--     capabilities = capabilities
 }
 -- }}}4
 -- Svelte completion options{{{4
@@ -192,7 +227,7 @@ require'lspconfig'.solidity_ls.setup{
 -- Interface settings {{{2
 -- set number relativenumber "set hybrid numbers
 set.termguicolors = true
-set.laststatus    = 2 -- status bar is shown even when in only one buffer
+set.laststatus    = with_version'0.7'(3,2) -- status bar is shown even when in only one buffer
 set.errorbells    = false -- disable beep on errors
 set.wildmenu      = true -- display command line's tab complete options as menu
 set.incsearch     = true-- search the word as its written
@@ -201,6 +236,7 @@ set.termguicolors = true-- enables true color in terminal. Uses cterm values
 set.fillchars     = "eob: ,fold: "
 set.background    = "dark"
 set.conceallevel  = 1
+vim.g.ayuncolor   = "dark"
 v'colorscheme ayun'
 -- Other cool colorschemes {{{3
 -- Dark {{{4
@@ -246,12 +282,12 @@ function _G.Toggle_venn()
         vim.b.venn_enabled = true
         vim.cmd[[setlocal virtualedit='all']]
         -- draw a line on HJKL keystokes
-        vim.api.nvim_buf_set_keymap(0, "n", "J", "<C-v>j:VBox<CR>", {noremap = true})
-        vim.api.nvim_buf_set_keymap(0, "n", "K", "<C-v>k:VBox<CR>", {noremap = true})
-        vim.api.nvim_buf_set_keymap(0, "n", "L", "<C-v>l:VBox<CR>", {noremap = true})
-        vim.api.nvim_buf_set_keymap(0, "n", "H", "<C-v>h:VBox<CR>", {noremap = true})
+        buf_map("n", "J", "<C-v>j:VBox<CR>")
+        buf_map("n", "K", "<C-v>k:VBox<CR>")
+        buf_map("n", "L", "<C-v>l:VBox<CR>")
+        buf_map("n", "H", "<C-v>h:VBox<CR>")
         -- draw a box by pressing "f" with visual selection
-        vim.api.nvim_buf_set_keymap(0, "v", "f", ":VBox<CR>", {noremap = true})
+        buf_map("v", "f", ":VBox<CR>")
     else
         vim.cmd[[setlocal virtualedit=]]
         vim.cmd[[mapclear <buffer>]]
@@ -259,7 +295,7 @@ function _G.Toggle_venn()
     end
 end
 -- toggle keymappings for venn using <leader>v
-vim.api.nvim_set_keymap('n', '<leader>v', ":lua Toggle_venn()<CR>", {noremap = true})
+keymap('n', '<leader>v', ":lua Toggle_venn()<CR>")
 -- }}}3
 -- Indent-blank line {{{3
 require'indent_blankline'.setup{
@@ -273,7 +309,8 @@ v[[nnoremap <leader>il :IndentBlanklineToggle<CR>]]
 -- }}}3
 -- feline status line {{{3
 require('feline').setup(
-	require 'feline-setups.6cdh'
+	-- require 'feline-setups.6cdh'
+    {}
 )
 -- }}}3
 -- ultisnips {{{3
@@ -305,20 +342,39 @@ vim.g.vim_parinfer_filetypes = {'lisp', 'yuck'}
 -- }}}3
 -- fern file browser {{{3
 if vim.fn.has('nvim-0.7') then
-	vim.g['fern#rederer'] = 'nerdfont'
-	local opts = { noremap=true, silent=true }
-	local fern_settings = function()
-		buf_map('n', 'p',     '<Plug>(fern-action-preview:toggle)',           opts)
-		buf_map('n', '<C-p>', '<Plug>(fern-action-preview:auto:toggle)',      opts)
-		buf_map('n', '<C-d>', '<Plug>(fern-action-preview:scroll:down:half)', opts)
-		buf_map('n', '<C-u>', '<Plug>(fern-action-preview:scroll:up:half)',   opts)
-		buf_map('n', '-',     '<Plug>(fern-action-leave)',                    opts)
-		buf_map('n', '+',     '<Plug>(fern-action-mark)',                     opts)
+	vim.g['fern#renderer'] = 'nerdfont'
+	local fern_mappings = function()
+		buf_map('n', 'p',     '<Plug>(fern-action-preview:toggle)')
+		buf_map('n', '<C-p>', '<Plug>(fern-action-preview:auto:toggle)')
+		buf_map('n', '<C-d>', '<Plug>(fern-action-preview:scroll:down:half)')
+		buf_map('n', '<C-u>', '<Plug>(fern-action-preview:scroll:up:half)')
+		buf_map('n', '-',     '<Plug>(fern-action-leave)')
+		buf_map('n', '+',     '<Plug>(fern-action-mark)')
+        buf_map('n', 'ZZ',    '<Cmd>quit<CR>')
 	end
+    -- v[[
+    -- function! FernSettings() abort
+    --   nmap <silent> <buffer> p     <Plug>(fern-action-preview:toggle)
+    --   nmap <silent> <buffer> <C-p> <Plug>(fern-action-preview:auto:toggle)
+    --   nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
+    --   nmap <silent> <buffer> <C-u> <Plug>(fern-action-preview:scroll:up:half)
+    --   nmap <silent> <buffer> - <Plug>(fern-action-leave)
+    --   nmap <silent> <buffer> + <Plug>(fern-action-mark)
+    -- endfunction
+    -- ]]
+    augroup'fern_settings'{
+        autocmd('FileType', 'fern', fern_mappings)
+    }
+
+	-- vim.api.nvim_create_autocmd('ColorScheme', {
+	--   pattern = 'rubber',
+	--   group = augroup,
+	--   command = 'highlight String guifg=#FFEB95'
+	-- })
 else
 v[[
 let g:fern#renderer = 'nerdfont'
-function! s:fern_settings() abort
+function! FernSettings() abort
   nmap <silent> <buffer> p     <Plug>(fern-action-preview:toggle)
   nmap <silent> <buffer> <C-p> <Plug>(fern-action-preview:auto:toggle)
   nmap <silent> <buffer> <C-d> <Plug>(fern-action-preview:scroll:down:half)
@@ -329,7 +385,7 @@ endfunction
 
 augroup fern-settings
   autocmd!
-  autocmd FileType fern lua fern_settings()
+  autocmd FileType fern call FernSettings()
 augroup END
 ]]
 end
@@ -348,15 +404,11 @@ vim.g.mapleader=" "
 
 local opts = { noremap=true, silent=true }
 
-keymap('i', '<C-C>', '<Esc>', opts) -- So <C-c> is detected by InsertLeave
+keymap('i', '<C-C>', '<Esc>') -- So <C-c> is detected by InsertLeave
 
-keymap('n', '<leader>ue', '<Cmd>UltiSnipsEdit<CR>',                    opts)
+keymap('n', '<leader>ue', '<Cmd>UltiSnipsEdit<CR>')
 -- Regular normal mappings {{{2
-keymap('n', '<C-l>',      '<Cmd>silent nohlsearch<CR><C-l>',           opts) -- TODO: Why isn't it working?
--- v'nnoremap <silent> <C-l> <Cmd>silent nohlsearch<CR><C-l>'
-
-
-
+keymap('n', '<C-l>',      '<Cmd>silent nohlsearch<CR><C-l>')
 v[[
 let s:hidden_all = 0
 function! ToggleHiddenAll()
@@ -378,85 +430,133 @@ function! ToggleHiddenAll()
 	endif
 endfunction
 
-nnoremap <silent> <A-S-z> :call ToggleHiddenAll()<CR>
+nnoremap <silent> <A-S-z> <Cmd>call ToggleHiddenAll()<CR>
+nnoremap <silent> <A-S-x> <Cmd>call ToggleModalHybridNumbers()<CR>
 ]]
+
+-- Switch ayu-ish colorschemes' variants {{{3
+_G.ToggleColorschemeVariant = function()end
+for _,colorscheme in ipairs({'ayu', 'ayun'}) do
+	local varname = colorscheme .. 'color'
+	if vim.g.colors_name == colorscheme then
+		v[[
+		function! ToggleColorschemeVariant()
+			if g:ayuncolor == 'dark'
+				let g:ayuncolor = 'light'
+			else
+				let g:ayuncolor = 'dark'
+			endif
+			colorscheme ayun
+		endfunction
+		]]
+		-- _G.ToggleColorschemeVariant = function()
+		-- 	if vim.g[varname] == 'dark' then
+		-- 		vim.g[varname] = 'light'
+		-- 	else
+		-- 		vim.g[varname] = 'dark'
+		-- 	end
+		-- end
+	end
+end
+keymap('n', '<leader>cst', '<Cmd>call ToggleColorschemeVariant()<CR>')
+-- }}}#
 -- }}}2
 -- Terminal mappings {{{2
-keymap('t', '<A-c>',      '<C-\\><C-N>',                               opts)
+keymap('t', '<A-c>',      '<C-\\><C-N>')
 
-keymap('t', '<A-h>',      '<C-\\><C-N><A-h>',                          opts)
-keymap('t', '<A-j>',      '<C-\\><C-N><A-j>',                          opts)
-keymap('t', '<A-k>',      '<C-\\><C-N><A-k>',                          opts)
-keymap('t', '<A-l>',      '<C-\\><C-N><A-l>',                          opts)
+keymap('t', '<A-h>',      '<C-\\><C-N><A-h>')
+keymap('t', '<A-j>',      '<C-\\><C-N><A-j>')
+keymap('t', '<A-k>',      '<C-\\><C-N><A-k>')
+keymap('t', '<A-l>',      '<C-\\><C-N><A-l>')
 -- }}}2
 -- Quicklist mappings {{{2
-keymap('n', '<leader>qo', '<Cmd>copen<CR>',  opts)
-keymap('n', '<leader>qc', '<Cmd>cclose<CR>', opts)
-keymap('n', '<leader>qn', '<Cmd>cnext<CR>',  opts)
-keymap('n', '<leader>qN', '<Cmd>cprev<CR>',  opts)
+keymap('n', '<leader>qo', '<Cmd>copen<CR>')
+keymap('n', '<leader>qc', '<Cmd>cclose<CR>')
+keymap('n', '<leader>qn', '<Cmd>cnext<CR>')
+keymap('n', '<leader>qN', '<Cmd>cprev<CR>')
 -- }}}2
 -- Locallist mappings {{{2
-keymap('n', '<leader>lo', '<Cmd>lopen<CR>',  opts)
-keymap('n', '<leader>lc', '<Cmd>lclose<CR>', opts)
-keymap('n', '<leader>ln', '<Cmd>lnext<CR>',  opts)
-keymap('n', '<leader>lN', '<Cmd>lprev<CR>',  opts)
+keymap('n', '<leader>lo', '<Cmd>lopen<CR>')
+keymap('n', '<leader>lc', '<Cmd>lclose<CR>')
+keymap('n', '<leader>ln', '<Cmd>lnext<CR>')
+keymap('n', '<leader>lN', '<Cmd>lprev<CR>')
 -- }}}2
 -- Diff mappings {{{2
-keymap('n', '<leader>tt', '<Cmd>TroubleToggle<CR>',                    opts)
-keymap('n', 'gh',         '<Cmd>diffget //2<CR>',                      opts)
-keymap('n', 'gl',         '<Cmd>diffget //3<CR>',                      opts)
+keymap('n', '<leader>tt', '<Cmd>TroubleToggle<CR>')
+keymap('n', 'gh',         '<Cmd>diffget //2<CR>')
+keymap('n', 'gl',         '<Cmd>diffget //3<CR>')
 
-keymap('n', '<leader>dt', '<Cmd>diffthis<CR>',                         opts)
-keymap('n', '<leader>do', '<Cmd>diffoff<CR>',                          opts)
+keymap('n', '<leader>dt', '<Cmd>diffthis<CR>')
+keymap('n', '<leader>do', '<Cmd>diffoff<CR>')
 -- }}}2
 -- nvim-lsp mappings {{{2
-keymap('i', '<C-space>',  '<C-x><C-o>',                                opts)
+keymap('i', '<C-space>',  '<C-x><C-o>')
 
-keymap('n', 'gD',         '<Cmd>lua vim.lsp.buf.declaration()<CR>',    opts)
-keymap('n', 'gd',         '<Cmd>lua vim.lsp.buf.definition()<CR>',     opts)
-keymap('n', 'K',          '<Cmd>lua vim.lsp.buf.hover()<CR>',          opts)
-keymap('n', 'gi',         '<Cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-keymap('n', '<C-k>',      '<Cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-keymap('n', '<space>D',   '<Cmd>lua vim.lsp.buf.type_definition()<CR>',opts)
-keymap('n', '<space>r',   '<Cmd>lua vim.lsp.buf.rename()<CR>',         opts)
-keymap('n', '<space>a',   '<Cmd>lua vim.lsp.buf.code_action()<CR>',    opts)
-keymap('n', 'gr',         '<Cmd>lua vim.lsp.buf.references()<CR>',     opts)
-keymap('n', '<space>e',   '<Cmd>lua vim.diagnostic.open_float()<CR>',  opts)
-keymap('n', '[d',         '<Cmd>lua vim.diagnostic.goto_prev()<CR>',   opts)
-keymap('n', ']d',         '<Cmd>lua vim.diagnostic.goto_next()<CR>',   opts)
-keymap('n', '<space>q',   '<Cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
--- keymap('n', '<space>f',   '<Cmd>lua vim.lsp.buf.formatting()<CR>',     opts)
+keymap('n', 'gD',         '<Cmd>lua vim.lsp.buf.declaration()<CR>')
+keymap('n', 'gd',         '<Cmd>lua vim.lsp.buf.definition()<CR>')
+keymap('n', 'K',          '<Cmd>lua vim.lsp.buf.hover()<CR>')
+keymap('n', 'gi',         '<Cmd>lua vim.lsp.buf.implementation()<CR>')
+keymap('n', '<C-k>',      '<Cmd>lua vim.lsp.buf.signature_help()<CR>')
+keymap('n', '<space>D',   '<Cmd>lua vim.lsp.buf.type_definition()<CR>')
+keymap('n', '<space>r',   '<Cmd>lua vim.lsp.buf.rename()<CR>')
+keymap('n', '<space>a',   '<Cmd>lua vim.lsp.buf.code_action()<CR>')
+keymap('n', 'gr',         '<Cmd>lua vim.lsp.buf.references()<CR>')
+keymap('n', '<space>e',   '<Cmd>lua vim.diagnostic.open_float()<CR>')
+keymap('n', '[d',         '<Cmd>lua vim.diagnostic.goto_prev()<CR>')
+keymap('n', ']d',         '<Cmd>lua vim.diagnostic.goto_next()<CR>')
+keymap('n', '<space>q',   '<Cmd>lua vim.diagnostic.set_loclist()<CR>')
+-- keymap('n', '<space>f',   '<Cmd>lua vim.lsp.buf.formatting()<CR>')
 -- }}}2
 -- Buffer movement {{{2
-keymap('n', '<C-N>',      '<Cmd>bprev<CR>',                            opts)
-keymap('n', '<C-M>',      '<Cmd>bnext<CR>',                            opts)
+keymap('n', '<C-N>',      '<Cmd>bprev<CR>')
+keymap('n', '<C-M>',      '<Cmd>bnext<CR>')
 
--- keymap('n', '<A-h>',      '<C-w>h',                                    opts)
-keymap('n', '<A-h>',      '<Cmd>TmuxNavigateLeft<CR>',                 opts)
--- keymap('n', '<A-j>',      '<C-w>j',                                    opts)
-keymap('n', '<A-j>',      '<Cmd>TmuxNavigateDown<CR>',                 opts)
--- keymap('n', '<A-k>',      '<C-w>k',                                    opts)
-keymap('n', '<A-k>',      '<Cmd>TmuxNavigateUp<CR>',                   opts)
--- keymap('n', '<A-l>',      '<C-w>l',                                    opts)
-keymap('n', '<A-l>',      '<Cmd>TmuxNavigateRight<CR>',                opts)
+-- keymap('n', '<A-h>',      '<C-w>h')
+keymap('n', '<A-h>',      '<Cmd>TmuxNavigateLeft<CR>')
+-- keymap('n', '<A-j>',      '<C-w>j')
+keymap('n', '<A-j>',      '<Cmd>TmuxNavigateDown<CR>')
+-- keymap('n', '<A-k>',      '<C-w>k')
+keymap('n', '<A-k>',      '<Cmd>TmuxNavigateUp<CR>')
+-- keymap('n', '<A-l>',      '<C-w>l')
+keymap('n', '<A-l>',      '<Cmd>TmuxNavigateRight<CR>')
 
-keymap('n', '<A-S-j>',    '<Cmd>sp<CR>',                               opts)
-keymap('n', '<A-S-l>',    '<Cmd>vsp<CR>',                              opts)
+keymap('n', '<A-S-j>',    '<Cmd>sp<CR>')
+keymap('n', '<A-S-l>',    '<Cmd>vsp<CR>')
 -- }}}2
 -- Telescope mappings {{{2
-keymap('n', '<leader>fh', '<Cmd>Telescope help_tags<CR>',               opts)
-keymap('n', '<leader>ff', '<Cmd>Telescope find_files<CR>',              opts)
-keymap('n', '<leader>ft', '<Cmd>Telescope live_grep<CR>',               opts)
-keymap('n', '<leader>fm', '<Cmd>Telescope keymaps<CR>',                 opts)
-keymap('n', '<leader>fcs','<Cmd>Telescope colorscheme<CR>',             opts)
+keymap('n', '<leader>fh', '<Cmd>Telescope help_tags<CR>')
+keymap('n', '<leader>ff', '<Cmd>Telescope find_files<CR>')
+keymap('n', '<leader>ft', '<Cmd>Telescope live_grep<CR>')
+keymap('n', '<leader>fm', '<Cmd>Telescope keymaps<CR>')
+keymap('n', '<leader>fcs','<Cmd>Telescope colorscheme<CR>')
 -- }}}2
 -- }}}1
 -- Autocommands {{{1
-v[[
+if vim.fn.has('nvim-0.7') then
+    --          EVENT                     PATTERN          COMMAND
+    augroup'lsp'{
+        autocmd('FileType',               {'scala','sbt'}, function()require'metals'.initialize_or_attach{}end);
+    }
+    augroup'templates'{
+        autocmd('BufNewFile',             '*.cpp',         '0r ~/.vim/templates/cpp.tpl');
+    }
+    augroup'obscure_syntax_highlighting'{
+        autocmd({'BufNewFile','BufRead'}, '/*.rasi',       'setf css');
+        autocmd({'BufNewFile','BufRead'}, '/*.mdx',        'setf markdown');
+    }
+else v[[
 augroup lsp
 	au!
 	au FileType scala,sbt lua require("metals").initialize_or_attach({})
 augroup end
+
+" Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
+autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
+
+" Syntax highlighting in .rasi files (Rofi theme files)
+autocmd BufNewFile,BufRead /*.rasi setf css
+" Syntax highlighting in .mdx files (Markdown extended files)
+autocmd BufNewFile,BufRead /*.mdx setf markdown
 
 " Switching between relative and nonrelative numbers between insert and normal mode
 function! ToggleModalHybridNumbers()
@@ -477,17 +577,8 @@ function! ToggleModalHybridNumbers()
 endfunction
 call ToggleModalHybridNumbers()
 call ToggleHiddenAll()
-
-nnoremap <silent> <A-S-x> <Cmd>call ToggleModalHybridNumbers()<CR>
-
-" Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
-autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
-
-" Syntax highlighting in .rasi files (Rofi theme files)
-autocmd BufNewFile,BufRead /*.rasi setf css
-" Syntax highlighting in .mdx files (Markdown extended files)
-autocmd BufNewFile,BufRead /*.mdx setf markdown
 ]]
+end
 -- }}}1
 -- User commands {{{
 -- TODO: Define sessions in a specified directory
@@ -501,9 +592,7 @@ if vim.g.neovide then
     vim.g.neovide_fullscreen=true
     vim.g.neovide_cursor_vfx_mode = "sonicboom"
     -- vim.g.neovide_cursor_vfx_mode = "railgun"
-	local opts = { noremap=true, silent=true }
-	local function nmap(keys,cmd) vim.api.nvim_buf_set_keymap(0,'n',keys,cmd,opts) end
-	nmap('<M-CR>', '<Cmd>let g:neovide_fullscreen=!g:neovide_fullscreen<CR>')
+	buf_map('n', '<M-CR>', '<Cmd>let g:neovide_fullscreen=!g:neovide_fullscreen<CR>')
 end
 -- vim.g.neovide_
 -- }}}1
