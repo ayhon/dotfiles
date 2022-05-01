@@ -76,6 +76,7 @@ require'packer'.startup(function(use)
 	use 'protesilaos/tempus-themes-vim'
 	-- }}}
 	-- Interface {{{
+	use 'lewis6991/gitsigns.nvim'
 	use 'feline-nvim/feline.nvim'
 	use 'markonm/traces.vim'
 	use 'junegunn/goyo.vim'

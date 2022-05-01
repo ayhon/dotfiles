@@ -263,12 +263,10 @@ local components = {
 -- LuaFormatter on
 
 -- require'feline'.setup {
-return {
+require'feline'.setup{
     default_bg = colors.bg,
     default_fg = colors.fg,
     components = components,
     properties = properties,
     vi_mode_colors = vi_mode_colors
 }
-
-

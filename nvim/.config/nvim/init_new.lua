@@ -1,13 +1,28 @@
 -- Constants, aliases and functions {{{1
 local v = vim.cmd
 local set = vim.opt
-local keymap_options = { noremap=true, silent=true }
-local keymap =  function(mode,shortcut,cmd) vim.api.nvim_set_keymap(      mode,shortcut,cmd,keymap_options) end
-local buf_map = function(mode,shortcut,cmd) vim.api.nvim_buf_set_keymap(0,mode,shortcut,cmd,keymap_options) end
+local keymap_options = { silent=true }
+local keymap =  function(mode,shortcut,cmd) vim.keymap.set(mode,shortcut,cmd,keymap_options) end
+local buf_map = function(mode,shortcut,cmd)
+	keymap_options.buffer = true
+	vim.keymap.set(mode,shortcut,cmd,keymap_options)
+end
+-- Version logic {{{2
+local function has(version)
+	return vim.fn.has(version) == 1
+end
+local function with_version(version) return function(yes, no)
+	if has('nvim-'..version) then
+		return yes
+	else
+		return no
+	end
+end end
+-- }}}2
 -- Autocommands setup {{{2
 local augroup = function(_) error "Only available in nvim-0.7+" end
 local autocmd = function(_,_,_,_) error "Only available in nvim-0.7+" end
-if vim.fn.has('nvim-0.7') then
+if has('nvim-0.7') then
     --[[ USAGE [[
     augroup 'AutoCmdName' {
       autocmd('Event1', 'pattern1', function() ... end);
@@ -34,13 +49,6 @@ if vim.fn.has('nvim-0.7') then
     end end
 end
 -- }}}2
-local function with_version(version) return function(yes, no)
-	if vim.fn.has('nvim-'..version) then
-		return yes
-	else
-		return no
-	end
-end end
 -- }}}1
 -- Settings {{{1
 -- nvim-lsp settings {{{2
@@ -308,10 +316,8 @@ v[[nnoremap <leader>il :IndentBlanklineToggle<CR>]]
 -- require'nvim-tree'.setup{}
 -- }}}3
 -- feline status line {{{3
-require('feline').setup(
-	-- require 'feline-setups.6cdh'
-    {}
-)
+-- require('feline').setup{}
+require 'feline-setups.iBhagwan'()
 -- }}}3
 -- ultisnips {{{3
 vim.g.UltiSnipsEditSplit = "horizontal"
@@ -341,7 +347,7 @@ vim.g.vim_parinfer_globs = {'*.lisp', 'yuck'}
 vim.g.vim_parinfer_filetypes = {'lisp', 'yuck'}
 -- }}}3
 -- fern file browser {{{3
-if vim.fn.has('nvim-0.7') then
+if has('nvim-0.7') then
 	vim.g['fern#renderer'] = 'nerdfont'
 	local fern_mappings = function()
 		buf_map('n', 'p',     '<Plug>(fern-action-preview:toggle)')
@@ -392,73 +398,114 @@ end
 -- }}}3
 -- colorizer.lua {{{3
 require'colorizer'.setup{
-	vim = {
-		mode = 'background'
-	}
+	'vim',
+	'lua'
 }
+-- }}}3
+-- Fine command line {{{3
+--[[
+require'fine-cmdline'.setup({
+	cmdline = {
+		enable_keymaps = true,
+		smart_history = true,
+		prompt = ':'
+	},
+	popup = {
+		position = {
+			row = '10%',
+			col = '50%',
+		},
+		size = {
+			width = '60%',
+		},
+		border = {
+			style = 'rounded',
+		},
+		win_options = {
+			winhighlight = 'Normal:Normal,FloatBorder:FloatBorder',
+		},
+	},
+	-- hooks = {
+	-- 	before_mount = function(input)
+	-- 		-- code
+	-- 	end,
+	-- 	after_mount = function(input)
+	-- 		-- code
+	-- 	end,
+	-- 	set_keymaps = function(imap, feedkeys)
+	-- 		-- code
+	-- 	end
+	-- }
+}) --]]
+-- }}}3
+-- gitsigns {{{3
+require'gitsigns'.setup{}
 -- }}}3
 -- }}}2
 -- }}}1
 -- Mappings {{{1
 vim.g.mapleader=" "
 
-local opts = { noremap=true, silent=true }
-
 keymap('i', '<C-C>', '<Esc>') -- So <C-c> is detected by InsertLeave
 
 keymap('n', '<leader>ue', '<Cmd>UltiSnipsEdit<CR>')
 -- Regular normal mappings {{{2
 keymap('n', '<C-l>',      '<Cmd>silent nohlsearch<CR><C-l>')
-v[[
-let s:hidden_all = 0
-function! ToggleHiddenAll()
-	call ToggleModalHybridNumbers()
-	if s:hidden_all  == 0
-		let s:hidden_all = 1
-		set noshowmode
-		set noruler
-		set laststatus=0
-		set noshowcmd
-		set signcolumn=no
+local hidden_all = false
+local function ToggleModalHybridNumbers()
+	if vim.fn.exists('#ModalHybridNumbers#InsertEnter') then
+		set.relativenumber = true
+		set.number = true
+		augroup'ModelHybridNumbers'{
+			autocmd('InsertEnter', '*', 'setlocal norelativenumber');
+			autocmd('InsertLeave', '*', 'setlocal relativenumber');
+		}
 	else
-		let s:hidden_all = 0
-		set showmode
-		set ruler
-		set laststatus=2
-		set showcmd
-		set signcolumn=auto
-	endif
-endfunction
-
-nnoremap <silent> <A-S-z> <Cmd>call ToggleHiddenAll()<CR>
-nnoremap <silent> <A-S-x> <Cmd>call ToggleModalHybridNumbers()<CR>
-]]
+		set.relativenumber = false
+		set.number = false
+		augroup'ModelHybridNumbers'{
+		}
+	end
+end
+vim.pretty_print(ToggleModalHybridNumbers)
+local function ToggleHiddenAll()
+	ToggleModalHybridNumbers()
+	if hidden_all then
+		set.showmode   = false
+		set.ruler      = false
+		set.laststatus = 0
+		set.showcmd    = false
+		set.signcolumn = 'no'
+	else
+		set.showmode   = true
+		set.ruler      = true
+		set.laststatus = 2
+		set.showcmd    = true
+		set.signcolumn = 'auto'
+	end
+	hidden_all = not hidden_all
+end
+vim.keymap.set('n', '<A-S-z>', ToggleHiddenAll, keymap_options)
+vim.keymap.set('n', '<A-S-x>', ToggleModalHybridNumbers, keymap_options)
+ToggleModalHybridNumbers()
+ToggleHiddenAll()
 
 -- Switch ayu-ish colorschemes' variants {{{3
-_G.ToggleColorschemeVariant = function()end
 for _,colorscheme in ipairs({'ayu', 'ayun'}) do
 	local varname = colorscheme .. 'color'
 	if vim.g.colors_name == colorscheme then
-		v[[
-		function! ToggleColorschemeVariant()
-			if g:ayuncolor == 'dark'
-				let g:ayuncolor = 'light'
+		local function ToggleColorschemeVariant()
+			if vim.g[varname] == 'dark' then
+				vim.g[varname] = 'light'
 			else
-				let g:ayuncolor = 'dark'
-			endif
-			colorscheme ayun
-		endfunction
-		]]
-		-- _G.ToggleColorschemeVariant = function()
-		-- 	if vim.g[varname] == 'dark' then
-		-- 		vim.g[varname] = 'light'
-		-- 	else
-		-- 		vim.g[varname] = 'dark'
-		-- 	end
-		-- end
+				vim.g[varname] = 'dark'
+			end
+			v('colorscheme ' .. colorscheme)
+			require'feline'.colors = require'feline-setups.theme.ayun'.get_variant_colors()
+		end
+		vim.keymap.set('n', '<leader>cst', ToggleColorschemeVariant, keymap_options)
 	end
 end
-keymap('n', '<leader>cst', '<Cmd>call ToggleColorschemeVariant()<CR>')
 -- }}}#
 -- }}}2
 -- Terminal mappings {{{2
@@ -532,7 +579,7 @@ keymap('n', '<leader>fcs','<Cmd>Telescope colorscheme<CR>')
 -- }}}2
 -- }}}1
 -- Autocommands {{{1
-if vim.fn.has('nvim-0.7') then
+if has('nvim-0.7') then
     --          EVENT                     PATTERN          COMMAND
     augroup'lsp'{
         autocmd('FileType',               {'scala','sbt'}, function()require'metals'.initialize_or_attach{}end);
