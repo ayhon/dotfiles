@@ -267,6 +267,9 @@ if vim.g.neovide then
     vim.g.neovide_fullscreen=true
     vim.g.neovide_cursor_vfx_mode = "sonicboom"
     -- vim.g.neovide_cursor_vfx_mode = "railgun"
+	local opts = { noremap=true, silent=true }
+	local function nmap(keys,cmd) vim.api.nvim_buf_set_keymap(0,'n',keys,cmd,opts) end
+	nmap('<M-CR>', '<Cmd>let g:neovide_fullscreen=!g:neovide_fullscreen<CR>')
 end
 -- vim.g.neovide_
 -- }}}1
