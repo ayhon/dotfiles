@@ -1,0 +1,12 @@
+snippet main "What to do when run as main"
+if __name__ == "__main__":
+	${1:from sys import argv
+	main(argv)}
+endsnippet
+
+snippet repl "Insert a Read-Eval-Print-Loop"
+# REPL START
+from code import interact
+interact(local=locals())
+# REPL END
+endsnippet
