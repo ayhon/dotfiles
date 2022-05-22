@@ -13,7 +13,7 @@ CMD_NAME="setup"
 DATA_DIR_NAME="data"
 SAVED_DIRECTORIES="Desktop Documents Downloads Music Pictures Videos Work"
 
-REQUIRED_PKGS="stow git curl"
+REQUIRED_PKGS="stow git curl jq"
 BASIC_PKGS="tmux neovim git unrar mpv pandoc tldr gdb fzf"
 EXTRA_PKGS="obs gimp yad flameshot translate-shell ranger rofi feh"
 
@@ -47,6 +47,18 @@ get_shell_RC(){
 			;;
 	esac
 	echo $rc_shell
+}
+get_release_assets_urls(){
+	local organization="$1"
+	local repository="$2"
+	curl -s "https://api.github.com/repos/$organization/$repository/releases/latest" \
+		| jq .assets[].browser_download_url
+}
+is_argument(){
+	case $1 in
+		"-"*) true;;
+		*) false;;
+	esac
 }
 
 # Program installation
@@ -282,6 +294,7 @@ setup(){
 			goal_msg "Installing yarn"
 			npm i --global yarn
 			;;
+
 		"evremap")
 			dependencies "libevdev-devel"
 
@@ -317,6 +330,32 @@ setup(){
 		"gef")
 			dependencies "gdb"
 			wget -q -O- https://github.com/hugsy/gef/raw/master/scripts/gef.sh | sh
+			print_err "You have to add a source statement to the .gdbinit config file"
+			;;
+
+		"logseq")
+			local appimage_url="$(get_release_assets_urls "logseq" "logseq" | grep AppImage | sed 's/"//g')"
+			local logseq_bin="$HOME/.local/bin/logseq"
+
+			goal_msg "Downloading logseq AppImage"
+			curl -Lo "$logseq_bin" "$appimage_url"
+			chmod u+x "$logseq_bin"
+
+			goal_msg "Downloading application icon"
+			curl -L "https://github.com/logseq/logseq/raw/master/resources/icons/logseq_big_sur.png" -o $HOME/.local/share/icons/logseq.png
+
+			goal_msg "Downloading .desktop file"
+			cat << EOF > "$HOME/.local/share/applications/Logseq.desktop"
+[Desktop Entry]
+Name=Logseq
+Exec=$HOME/.local/bin/logseq
+Terminal=false
+Type=Application
+Icon=$HOME/.local/share/icons/logseq.png
+StartupWMClass=logseq
+Comment=Open Source platform for knowledge sharing and management
+Categories=Office
+EOF
 			;;
 
 		"decay")
@@ -428,6 +467,7 @@ setup(){
 			;;
 	esac
 }
+
 usage(){
 	cat <<EOF
 Usage:
@@ -447,12 +487,6 @@ Targets:
   fzf     - Setup fzf with shortcuts
   wezterm - Setup wezterm
 EOF
-}
-is_argument(){
-	case $1 in
-		"-"*) true;;
-		*) false;;
-	esac
 }
 main(){
 	# echo $SCRIPT_DIR
