@@ -44,7 +44,10 @@ require'packer'.startup(function(use)
 	-- Language support {{{
 	-- Treesitter {{{
 	use{'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
+	use 'nvim-treesitter/playground'
 	-- }}}
+
+    use 'vim-syntastic/syntastic'
 
 	use 'jtadley/vim-qasm'
 
@@ -59,10 +62,10 @@ require'packer'.startup(function(use)
 
 	use{'plasticboy/vim-markdown',   {ft= {'markdown'}} }
 
-	use 'python-rope/ropevim'
+	-- use 'python-rope/ropevim'
 
 	use{'neovimhaskell/haskell-vim', {ft= {'haskell'}} }
-	use{'Twinside/vim-haskellConceal', {ft={'haskell'}} }
+	-- use{'Twinside/vim-haskellConceal', {ft={'haskell'}} }
 
 	use 'evanleck/vim-svelte'
 	use 'norcalli/nvim-colorizer.lua'

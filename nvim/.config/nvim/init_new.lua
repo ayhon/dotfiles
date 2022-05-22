@@ -20,35 +20,33 @@ local function with_version(version) return function(yes, no)
 end end
 -- }}}2
 -- Autocommands setup {{{2
-local augroup = function(_) error "Only available in nvim-0.7+" end
-local autocmd = function(_,_,_,_) error "Only available in nvim-0.7+" end
-if has('nvim-0.7') then
-    --[[ USAGE [[
-    augroup 'AutoCmdName' {
-      autocmd('Event1', 'pattern1', function() ... end);
-      autocmd('Event2', 'pattern2', 'g:VimFunction');
-      autocmd('Event3', 'pattern3', '<Cmd>echom "Regular commands"');
-    }
-    --]]
-	autocmd = function (event,pattern,cmd)
-        if type(cmd) == 'function' or type(cmd) == 'table' or type(cmd) == 'string' and string.sub(cmd,1,2) == 'g:' then
-            return {event=event,opts = {pattern=pattern,callback=cmd}}
-        elseif type(cmd) == 'string' then
-            return {event=event,opts = {pattern=pattern,command=cmd}}
-        else
-            print("You cannot execute "..type(cmd))
-            vim.pretty_print(cmd)
-        end
+--[[ USAGE [[
+augroup 'AutoCmdName' {
+  autocmd('Event1', 'pattern1', function() ... end);
+  autocmd('Event2', 'pattern2', 'g:VimFunction');
+  autocmd('Event3', 'pattern3', '<Cmd>echom "Regular commands"');
+}
+--]]
+local function autocmd(event,pattern,cmd)
+    if type(cmd) == 'function' or type(cmd) == 'table' or type(cmd) == 'string' and string.sub(cmd,1,2) == 'g:' then
+        return {event=event,opts = {pattern=pattern,callback=cmd}}
+    elseif type(cmd) == 'string' then
+        return {event=event,opts = {pattern=pattern,command=cmd}}
+    else
+        print("You cannot execute "..type(cmd))
+        vim.pretty_print(cmd)
     end
-	augroup = function (name) return function(autocmds)
-        local group = vim.api.nvim_create_augroup(name,{clear=true})
-        for _, autocmd in ipairs(autocmds) do
-            autocmd.opts.group = group
-            vim.api.nvim_create_autocmd(autocmd.event, autocmd.opts)
-        end
-    end end
 end
+local function augroup(name) return function(autocmds)
+    local group = vim.api.nvim_create_augroup(name,{clear=true})
+    for _, autocmd in ipairs(autocmds) do
+        autocmd.opts.group = group
+        vim.api.nvim_create_autocmd(autocmd.event, autocmd.opts)
+    end
+    return group
+end end
 -- }}}2
+local pprint = with_version'0.7'(vim.pretty_print, print)
 -- }}}1
 -- Settings {{{1
 -- nvim-lsp settings {{{2
@@ -244,6 +242,7 @@ set.termguicolors = true-- enables true color in terminal. Uses cterm values
 set.fillchars     = "eob: ,fold: "
 set.background    = "dark"
 set.conceallevel  = 1
+set.shortmess     : remove('F')
 vim.g.ayuncolor   = "dark"
 v'colorscheme ayun'
 -- Other cool colorschemes {{{3
@@ -279,6 +278,8 @@ set.completeopt={"menu", "menuone", "noselect"} -- list of options for completio
 set.hidden     = true    -- hide unused buffers instead of unloading them
 set.wildignore = {".gitkeep", "node_modules/**"}
 set.autochdir  = true
+set.foldmethod = 'expr'
+set.foldexpr   = 'nvim_treesitter#foldexpr()'
 -- }}}2
 -- Plugin settings {{{2
 require 'plugins'
@@ -441,6 +442,28 @@ require'fine-cmdline'.setup({
 -- gitsigns {{{3
 require'gitsigns'.setup{}
 -- }}}3
+-- nvim-treesitters {{{3
+require "nvim-treesitter.configs".setup {
+  playground = {
+    enable = true,
+    disable = {},
+    updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+    persist_queries = false, -- Whether the query persists across vim sessions
+    keybindings = {
+      toggle_query_editor = 'o',
+      toggle_hl_groups = 'i',
+      toggle_injected_languages = 't',
+      toggle_anonymous_nodes = 'a',
+      toggle_language_display = 'I',
+      focus_language = 'f',
+      unfocus_language = 'F',
+      update = 'R',
+      goto_node = '<cr>',
+      show_help = '?',
+    },
+  }
+}
+-- }}}3
 -- }}}2
 -- }}}1
 -- Mappings {{{1
@@ -451,44 +474,43 @@ keymap('i', '<C-C>', '<Esc>') -- So <C-c> is detected by InsertLeave
 keymap('n', '<leader>ue', '<Cmd>UltiSnipsEdit<CR>')
 -- Regular normal mappings {{{2
 keymap('n', '<C-l>',      '<Cmd>silent nohlsearch<CR><C-l>')
-local hidden_all = false
-local function ToggleModalHybridNumbers()
-	if vim.fn.exists('#ModalHybridNumbers#InsertEnter') then
+local modal_hybrid_numbers_id = nil
+function _G.ToggleModalHybridNumbers()
+	if vim.fn.exists('#ModalHybridNumbers#InsertEnter') == 0 then
 		set.relativenumber = true
 		set.number = true
-		augroup'ModelHybridNumbers'{
+		modal_hybrid_numbers_id = augroup'ModalHybridNumbers'{
 			autocmd('InsertEnter', '*', 'setlocal norelativenumber');
 			autocmd('InsertLeave', '*', 'setlocal relativenumber');
 		}
 	else
 		set.relativenumber = false
 		set.number = false
-		augroup'ModelHybridNumbers'{
-		}
+        vim.api.nvim_del_augroup_by_id(modal_hybrid_numbers_id)
 	end
 end
-vim.pretty_print(ToggleModalHybridNumbers)
-local function ToggleHiddenAll()
+local hidden_all = false
+function _G.ToggleHiddenAll()
 	ToggleModalHybridNumbers()
 	if hidden_all then
-		set.showmode   = false
-		set.ruler      = false
-		set.laststatus = 0
-		set.showcmd    = false
-		set.signcolumn = 'no'
-	else
 		set.showmode   = true
 		set.ruler      = true
 		set.laststatus = 2
 		set.showcmd    = true
 		set.signcolumn = 'auto'
+	else
+		set.showmode   = false
+		set.ruler      = false
+		set.laststatus = 0
+		set.showcmd    = false
+		set.signcolumn = 'no'
 	end
 	hidden_all = not hidden_all
 end
 vim.keymap.set('n', '<A-S-z>', ToggleHiddenAll, keymap_options)
 vim.keymap.set('n', '<A-S-x>', ToggleModalHybridNumbers, keymap_options)
-ToggleModalHybridNumbers()
 ToggleHiddenAll()
+ToggleModalHybridNumbers()
 
 -- Switch ayu-ish colorschemes' variants {{{3
 for _,colorscheme in ipairs({'ayu', 'ayun'}) do
