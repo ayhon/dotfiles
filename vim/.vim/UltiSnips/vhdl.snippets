@@ -124,18 +124,22 @@ case ${1:expression} is
 end case;
 endsnippet
 
+snippet regsignal
+signal ${1:register}_p, $1_n: ${2:type};
+endsnippet
+
 snippet register
-$4process (${2:CLKxCI}, ${3:RSTxRI}) is
+$4process (${2:clk}, ${3:reset_n}) is
 begin
-  if $3 = '1' then
-    ${1:Data}xDP <= (others => '0');
+  if $3 = '0' then
+    ${1:Data}_p <= (others => '0');
   elsif $2'event and $2 = '1' then
-    $1xDP <= $1xDN;
+    $1_p <= $1_n;
   end if;
 end process;
 endsnippet
 
 snippet registers
 type ${4:register_type} is array (0 to ${2:#registers}-1) of std_logic_vector(${3:wordsize}-1 downto 0)
-signal ${1:registers}: $4;
+signal ${1:registers}_p, $1_n: $4;
 endsnippet
