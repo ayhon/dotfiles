@@ -3,3 +3,4 @@
 /vim/.vim/autoload
 /vim/.vim/undodir
 nvim/.config/nvim/spell/
+/nvim/.config/nvim/undodir/
