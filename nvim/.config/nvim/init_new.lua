@@ -50,6 +50,7 @@ local pprint = with_version'0.7'(vim.pretty_print, print)
 -- }}}1
 -- Settings {{{1
 -- nvim-lsp settings {{{2
+if not vim.g.vscode then
 -- nvim-cmp {{{3
 local cmp = require 'cmp'
 local cmap = cmp.mapping
@@ -218,7 +219,7 @@ require'lspconfig'.svelte.setup{
 	capabilities = capabilities
 }
 -- }}}4
--- Solidity completion options 4{{{
+-- Solidity completion options {{{4
 require'lspconfig'.solidity_ls.setup{
 	root_dir = function(fname)
         return require'lspconfig'.util.find_git_ancestor(fname)
@@ -228,10 +229,15 @@ require'lspconfig'.solidity_ls.setup{
       end
 }
 -- }}}4
+-- Go completion optionsn {{{4
+require'lspconfig'.gopls.setup{}
+-- }}}4
 -- }}}3
+end
 -- }}}2
 -- Interface settings {{{2
 -- set number relativenumber "set hybrid numbers
+if not vim.g.vscode then
 set.termguicolors = true
 set.laststatus    = with_version'0.7'(3,2) -- status bar is shown even when in only one buffer
 set.errorbells    = false -- disable beep on errors
@@ -245,6 +251,7 @@ set.conceallevel  = 1
 set.shortmess     : remove('F')
 vim.g.ayuncolor   = "dark"
 v'colorscheme ayun'
+end
 -- Other cool colorschemes {{{3
 -- Dark {{{4
 -- colorscheme sky " Weirdly works best after dark background
@@ -277,11 +284,12 @@ set.mouse      = "a"     -- enable mouse
 set.completeopt={"menu", "menuone", "noselect"} -- list of options for completion
 set.hidden     = true    -- hide unused buffers instead of unloading them
 set.wildignore = {".gitkeep", "node_modules/**"}
-set.autochdir  = true
+set.autochdir  = false
 set.foldmethod = 'expr'
 set.foldexpr   = 'nvim_treesitter#foldexpr()'
 -- }}}2
 -- Plugin settings {{{2
+if not vim.g.vscode then
 require 'plugins'
 -- venn.nvim {{{3
 -- venn.nvim: enable or disable keymappings
@@ -322,6 +330,8 @@ require 'feline-setups.iBhagwan'()
 -- }}}3
 -- ultisnips {{{3
 vim.g.UltiSnipsEditSplit = "horizontal"
+
+keymap('n', '<leader>ue', '<Cmd>UltiSnipsEdit<CR>')
 -- }}}3
 -- vimtex {{{3
 vim.g.tex_flavor='latex'
@@ -464,14 +474,12 @@ require "nvim-treesitter.configs".setup {
   }
 }
 -- }}}3
+end
 -- }}}2
 -- }}}1
 -- Mappings {{{1
 vim.g.mapleader=" "
-
 keymap('i', '<C-C>', '<Esc>') -- So <C-c> is detected by InsertLeave
-
-keymap('n', '<leader>ue', '<Cmd>UltiSnipsEdit<CR>')
 -- Regular normal mappings {{{2
 keymap('n', '<C-l>',      '<Cmd>silent nohlsearch<CR><C-l>')
 local modal_hybrid_numbers_id = nil
@@ -649,11 +657,11 @@ call ToggleHiddenAll()
 ]]
 end
 -- }}}1
--- User commands {{{
+-- User commands {{{1
 -- TODO: Define sessions in a specified directory
 -- command Mksession mksession
---}}}
--- Neovide settings {{{2
+--}}}1
+-- Neovide settings {{{1
 if vim.g.neovide then
     -- vim.g.smoothie_enabled = false
     vim.g.neovide_cursor_animation_leght=0.13
