@@ -1,0 +1,18 @@
+snippet comp "Generic functional component" i
+import {${1:View, Text, StyleSheet, $2}} from 'react-native'
+
+export default (props: any) => {
+	return (
+		<View style={styles.main}>
+			$0
+		</View>
+	)
+}
+const styles = StyleSheet.create({
+	main: {
+		flexDirection: 'row',
+		justifyContents: 'center',
+		alignItems: 'center',
+	}
+})
+endsnippet

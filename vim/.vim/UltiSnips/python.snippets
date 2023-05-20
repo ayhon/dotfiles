@@ -1,4 +1,13 @@
+snippet pprint "I want something pretty printed"
+# PPRINT START
+from pprint import pprint
+pprint($0)
+# PPRINT END
+endsnippet
 snippet main "What to do when run as main"
+def main(args: list[str]):
+	${0:...}
+
 if __name__ == "__main__":
 	${1:from sys import argv
 	main(argv)}

@@ -2,15 +2,23 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-void resuelveCaso() {
+int T = -1; 
 
+using L = long long;
+using vi = vector<int>;
+using vvi = vector<vi>;
+using ii = pair<int,int>;
+using vii = vector<ii>;
+using vvii = vector<vii>;
+
+bool resuelveCaso() {
+
+
+	return --T;
 }
 
 int main() {
-	int T; cin >> T;
-	for(int caso = 1; caso <= T; caso++) {
-		// cout << "Case #" << caso <<":\n";
-		resuelveCaso();
-	}
+	cin >> T;
+	while(resuelveCaso());
 	return 0;
 }

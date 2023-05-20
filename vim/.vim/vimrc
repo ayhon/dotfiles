@@ -22,7 +22,7 @@ endif
 
 let mapleader=" "
 nmap Y y$
-imap <C-c> <Esc>
+imap <C-c> <Esc> 
 " <C-c> is not detected by InsertLeave
 
 set suffixes+=.aux,.bbl,.blg,.brf,.cb,.dvi,.idx,.ilg,.ind,.inx,.jpg,.log,.out,.png,.toc
@@ -63,30 +63,33 @@ endif
 call plug#begin('~/.vim/plugged')
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'	"Enable better multi file switching
-Plug 'junegunn/goyo.vim'
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-vinegar'
-Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
-Plug 'flazz/vim-colorschemes'
-Plug 'protesilaos/tempus-themes-vim'
-Plug 'jtadley/vim-qasm'
+	Plug 'junegunn/goyo.vim'
 
-Plug 'lambdalisue/nerdfont.vim'
-Plug 'lambdalisue/fern.vim'
-Plug 'lambdalisue/fern-hijack.vim'
-Plug 'lambdalisue/fern-renderer-nerdfont.vim'
-Plug 'yuki-yano/fern-preview.vim'
+	Plug 'tpope/vim-commentary'
+	Plug 'tpope/vim-surround'
+Plug 'tpope/vim-vinegar'
+	Plug 'tpope/vim-fugitive'			"https://www.youtube.com/watch?v=PO6DxfGPQvw and https://www.youtube.com/watch?v=73RulF4Md4Q TODO
+
+	Plug 'flazz/vim-colorschemes'
+	Plug 'folke/tokyonight.nvim'
+	Plug 'protesilaos/tempus-themes-vim'
+	Plug 'jtadley/vim-qasm'
+
+	Plug 'lambdalisue/nerdfont.vim'
+	Plug 'lambdalisue/fern.vim'
+	Plug 'lambdalisue/fern-hijack.vim'
+	Plug 'lambdalisue/fern-renderer-nerdfont.vim'
+	Plug 'yuki-yano/fern-preview.vim'
 
 " Plug 'sheerun/vim-polyglot'
-Plug 'bhurlow/vim-parinfer'
-Plug 'elkowar/yuck.vim'
-Plug 'JuliaEditorSupport/julia-vim'
-Plug 'tomlion/vim-solidity'
-Plug 'leafo/moonscript-vim'
-Plug 'plasticboy/vim-markdown', { 'for' : ['markdown']}
-Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
-Plug 'evanleck/vim-svelte'
+	Plug 'bhurlow/vim-parinfer'
+	Plug 'elkowar/yuck.vim'
+	Plug 'JuliaEditorSupport/julia-vim'
+	Plug 'tomlion/vim-solidity'
+	Plug 'leafo/moonscript-vim'
+	Plug 'plasticboy/vim-markdown', { 'for' : ['markdown']}
+	Plug 'neovimhaskell/haskell-vim', { 'for': ['haskell']}
+	Plug 'evanleck/vim-svelte'
 
 Plug 'itchyny/lightline.vim'
 Plug 'markonm/traces.vim'
@@ -107,8 +110,6 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 
 Plug 'Twinside/vim-haskellConceal', {'for': ['haskell']}
 Plug 'psliwka/vim-smoothie'
 Plug 'christoomey/vim-tmux-navigator'
-
-Plug 'markonm/traces.vim'
 call plug#end()
 "}}}
 " Plugin settings {{{
@@ -188,10 +189,10 @@ let g:mkdp_browserfunc = 'OpenURL'
 let g:tmux_navigator_no_mappings = 1
 
 function! SetNavigationWithinTMUX()
-	nnoremap <silent> <A-h> :TmuxNavigateLeft<cr>
-	nnoremap <silent> <A-j> :TmuxNavigateDown<cr>
-	nnoremap <silent> <A-k> :TmuxNavigateUp<cr>
-	nnoremap <silent> <A-l> :TmuxNavigateRight<cr>
+	nnoremap <silent> <A-h> <Cmd>TmuxNavigateLeft<cr>
+	nnoremap <silent> <A-j> <Cmd>TmuxNavigateDown<cr>
+	nnoremap <silent> <A-k> <Cmd>TmuxNavigateUp<cr>
+	nnoremap <silent> <A-l> <Cmd>TmuxNavigateRight<cr>
 endfunction
 " }}}
 " parinfer {{{
@@ -219,6 +220,18 @@ augroup END
 " Settings {{{
 " Interface{{{
 colorscheme ayu
+" Other cool colorschemes {{{
+" Dark {{{
+" colorscheme sky " Weirdly works best after dark background
+" colorscheme ayu
+" colorscheme jellyx
+" colorscheme benokai
+" }}}
+" White {{{
+" colorscheme macvim-light
+" colorscheme github
+" }}}
+" }}}
 " set number relativenumber "set hybrid numbers
 set laststatus=2 "status bar is shown even when in only one buffer
 set noerrorbells "disable beep on errors
@@ -253,30 +266,34 @@ set autochdir
 "}}}
 " Mappings {{{
 " Set normal mode mappings
-nnoremap <Leader>w :w<CR>
-nnoremap <Leader>q :qall<CR>
-nnoremap <Leader>! :q!<CR>
+nnoremap <Leader>w <Cmd>w<CR>
+nnoremap <Leader>q <Cmd>qall<CR>
+nnoremap <Leader>! <Cmd>q!<CR>
 " nnoremap <leader>H :set rnu! nu!<CR>
-nnoremap <leader>s :set spell!<CR>
-nnoremap <leader>t :term<CR><C-W>J<C-W>5_ python && exit<CR><C-L>
-nnoremap <leader>ue :UltiSnipsEdit<CR>
-nnoremap <silent> ñ :silent !xdg-open <cWORD><CR>
+nnoremap <leader>s <Cmd>set spell!<CR>
+nnoremap <leader>t <Cmd>term<CR><C-W>J<C-W>5_ python && exit<CR><C-L>
+nnoremap <leader>ue <Cmd>UltiSnipsEdit<CR>
+nnoremap <silent> ñ <Cmd>silent !xdg-open <cWORD><CR>
+
+" Diffing mappings
+nnoremap <leader>dt <Cmd>diffthis<CR>
+nnoremap <leader>do <Cmd>diffoff<CR>
 
 " Quicklist mappings
-nnoremap <leader>qo :copen<CR>
-nnoremap <leader>qc :cclose<CR>
-nnoremap <leader>qn :cnext<CR>
-nnoremap <leader>qN :cprev<CR>
+nnoremap <leader>qo <Cmd>copen<CR>
+nnoremap <leader>qc <Cmd>cclose<CR>
+nnoremap <leader>qn <Cmd>cnext<CR>
+nnoremap <leader>qN <Cmd>cprev<CR>
 
 " Locallist mappings
-nnoremap <leader>lo :lopen<CR>
-nnoremap <leader>lc :lclose<CR>
-nnoremap <leader>ln :cnext<CR>
-nnoremap <leader>lN :cprev<CR>
+nnoremap <leader>lo <Cmd>lopen<CR>
+nnoremap <leader>lc <Cmd>lclose<CR>
+nnoremap <leader>ln <Cmd>cnext<CR>
+nnoremap <leader>lN <Cmd>cprev<CR>
 
-nnoremap <silent> <C-l> :<C-u>nohlsearch<CR><C-l>
+nnoremap <silent> <C-l> <Cmd>silent nohlsearch<CR><C-l>
 "  Practical Vim's ↑ (Tip 81)
-"nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+	"nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 "  tpope's ↑
 
 " Use <C-space> for omnifunc in insert mode
@@ -310,8 +327,8 @@ nmap <buffer> L <CR>
 endfunction
 
 " Buffer movement {{{
-nnoremap <C-N> :bprev<CR>
-nnoremap <C-M> :bnext<CR>
+nnoremap <C-N> <Cmd>bprev<CR>
+nnoremap <C-M> <Cmd>bnext<CR>
 
 " Alt-hjkl for windows 
 noremap <A-h> <C-w>h
@@ -322,25 +339,25 @@ noremap <A-l> <C-w>l
 call SetNavigationWithinTMUX()
 
 " Alt-Shift-jl to create windows 
-noremap <A-S-j> :sp<CR>
-noremap <A-S-l> :vsp<CR>
+noremap <A-S-j> <Cmd>sp<CR>
+noremap <A-S-l> <Cmd>vsp<CR>
 "}}}
 
 " Quick google lookup
 nnoremap <leader>gg :silent !firefox -P devlookup -private -search "" &<Left><Left><Left>
 "
 " Fuzzy mappings{{{
-nnoremap <leader>fh :Helptags<CR>
-nnoremap <leader>ff :Files<CR>
-nnoremap <leader>ft :Rg<CR>
-nnoremap <leader>fcs :Colors<CR>
+nnoremap <leader>fh <Cmd>Helptags<CR>
+nnoremap <leader>ff <Cmd>Files<CR>
+nnoremap <leader>ft <Cmd>Rg<CR>
+nnoremap <leader>fcs <Cmd>Colors<CR>
 "}}}
 " Output the hlgroups under the cursor https://vim.fandom.com/wiki/Identify_the_syntax_highlighting_group_used_at_the_cursor
-noremap <F10> :echom 'hi<' . synIDattr(synID(line("."),col("."),1),"name") . '> trans<' . synIDattr(synID(line("."),col("."),0),"name") . '> lo<' . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . '>'<CR> 
+noremap <F10> <Cmd>echom 'hi<' . synIDattr(synID(line("."),col("."),1),"name") . '> trans<' . synIDattr(synID(line("."),col("."),0),"name") . '> lo<' . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . '>'<CR> 
 "}}}
 " Autocommands {{{
 " TODO: augroup's
-autocmd FileType cpp nnoremap <leader>c :w<CR>:!clear && g++ -g -o %< % && ./%< <CR>
+autocmd FileType cpp nnoremap <leader>c <Cmd>w<CR>:!clear && g++ -g -o %< % && ./%< <CR>
 
 " Switching between relative and nonrelative numbers between insert and normal mode
 function! ToggleModalHybridNumbers()
@@ -362,7 +379,7 @@ endfunction
 call ToggleModalHybridNumbers()
 call ToggleHiddenAll()
 
-nnoremap <silent> <A-S-x> :call ToggleModalHybridNumbers()<CR>
+nnoremap <silent> <A-S-x> <Cmd>call ToggleModalHybridNumbers()<CR>
 
 " netrw mappings {{{
 augroup netrw_mapping
@@ -370,8 +387,6 @@ autocmd!
 autocmd filetype netrw call NetrwMappings()
 augroup END
 " }}}
-
-
 
 " Suposed to make a template file for all C++ files TODO: Move to specific plugin file (after/cpp.vim)
 autocmd BufNewFile *.cpp 0r ~/.vim/templates/cpp.tpl
