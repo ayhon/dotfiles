@@ -2,7 +2,7 @@ if not pcall(require, "feline") then
   return
 end
 
-local ayun = require'feline-setups.theme.ayun'
+local ayu = require'feline-setups.theme.ayu'
 
 local colors = {
     bg =       '#282c34',
@@ -303,7 +303,7 @@ table.insert(components.active[3], comps.vi_mode.right)
 }) ]]
 
 return function ()
-	local colors = ayun.get_variant_colors()
+	local colors = ayu.get_variant_colors()
 	require'feline'.setup {
 		colors = { bg = colors.bg, fg = colors.fg },
 		components = components,
