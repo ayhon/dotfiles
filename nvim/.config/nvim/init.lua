@@ -247,7 +247,6 @@ require'lspconfig'.tsserver.setup{}
 -- Rust completion options {{{4
 local rt = require("rust-tools")
 -- require'lspconfig'.rust_analyzer.setup{} -- Conflicts with rust-tools
-
 rt.setup({
   server = {
     on_attach = function(_, bufnr)
@@ -624,14 +623,14 @@ keymap('t', '<A-l>',      '<C-\\><C-N><A-l>')
 -- Quicklist mappings {{{2
 keymap('n', '<leader>qo', '<Cmd>copen<CR>')
 keymap('n', '<leader>qc', '<Cmd>cclose<CR>')
-keymap('n', '<leader>qn', '<Cmd>cnext<CR>')
-keymap('n', '<leader>qN', '<Cmd>cprev<CR>')
+keymap('n', ']q', '<Cmd>cnext<CR>')
+keymap('n', '[q', '<Cmd>cprev<CR>')
 -- }}}2
 -- Locallist mappings {{{2
 keymap('n', '<leader>lo', '<Cmd>lopen<CR>')
 keymap('n', '<leader>lc', '<Cmd>lclose<CR>')
-keymap('n', '<leader>ln', '<Cmd>lnext<CR>')
-keymap('n', '<leader>lN', '<Cmd>lprev<CR>')
+keymap('n', ']l', '<Cmd>lnext<CR>')
+keymap('n', '[l', '<Cmd>lprev<CR>')
 -- }}}2
 -- Diff mappings {{{2
 keymap('n', '<leader>tt', '<Cmd>TroubleToggle<CR>')
@@ -681,23 +680,21 @@ keymap('n', '<leader>ff', '<Cmd>Telescope find_files<CR>')
 keymap('n', '<leader>ft', '<Cmd>Telescope live_grep<CR>')
 keymap('n', '<leader>fm', '<Cmd>Telescope keymaps<CR>')
 keymap('n', '<leader>fcs','<Cmd>Telescope colorscheme<CR>')
-keymap('n', '<leader>mc','<Cmd>lua require"telescope".extensions.metals.commands()<CR>')
+keymap('n', '<leader>mc','<Cmd>lua require"telescope".extensions.metals.commands()<CR>') -- TODO :Move to scala specific configuration
+-- }}}2
+-- Convenience mappings {{{2
+keymap('n', '<leader>vimrc', '<Cmd>tabe $MYVIMRC<Cr>')
 -- }}}2
 -- }}}1
 -- Autocommands {{{1
-v[[
-if &background == "dark"
-	echom "Oh yeah baby"	
-endif
-]]
 if has('nvim-0.7') then
     --          EVENT                     PATTERN          COMMAND
     augroup'lsp'{
         autocmd('FileType',               {'scala','sbt'}, function() require'metals'.initialize_or_attach(MetalsConfig)end);
     }
 	_G.CoqOverride = function()
-		v'highlight CoqtailChecked ctermbg=17 guibg=#224422'
-		v'highlight CoqtailSent ctermbg=60 guibg=#007630'
+		v'highlight CoqtailChecked ctermbg=17 guibg=#102710'
+		v'highlight CoqtailSent ctermbg=60 guibg=#004620'
 		v'highlight CoqtailError ctermbg=17 guibg=#560000'  
 		
 		
