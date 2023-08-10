@@ -64,39 +64,42 @@ create_session(){
 			id="poly"
 			tmux new-session -ds "$id" -c "$workdir"
 			;;
-		"personal")
-			tmux new-session -ds "$id" -c "$HOME"
+		"pers"|"personal")
+			tmux new-session -ds "pers" -c "$HOME"
 			;;
-		"ms")
-			local workdir="$HOME/Desktop/Projects/Lua/GeneralizedMinesweeper"
-			tmux new-session -ds "$id" -c "$workdir/src"
-			tmux send-keys -t "$id:0" nvim \   . Enter
-			tmux split-window -h -t "$id" -c "$workdir/spec"
-			tmux send-keys -t "$id" nvim \ . Enter
-			tmux split-window -v -t "$id" -c "$workdir" -l 1 "while true; do clear && busted; read; done"
+		"coq")
+			tmux new-session -ds "$id" -c "$HOME/Desktop/Projects/Coq/lf/"
 			;;
-		"lua2mc")
-		 	tmux new-session -ds "$id" -c "$HOME/git/lua2mc"
-			;;
-		"ecal")
-		 	tmux new-session -ds "$id" -c "$HOME/uni/Ecuaciones Algebraicas/"
-			;;
-		"ia")
-		 	tmux new-session -ds "$id" -c "$HOME/uni/Inteligencia artificial/"
-			;;
-		"redes")
-		 	tmux new-session -ds "$id" -c "$HOME/uni/Redes/"
-			;;
-		"so")
-		 	tmux new-session -ds "$id" -c "$HOME/uni/Sistemas operativos/"
-			;;
-		"ucppm")
+		# "ms")
+		# 	local workdir="$HOME/Desktop/Projects/Lua/GeneralizedMinesweeper"
+		# 	tmux new-session -ds "$id" -c "$workdir/src"
+		# 	tmux send-keys -t "$id:0" nvim \   . Enter
+		# 	tmux split-window -h -t "$id" -c "$workdir/spec"
+		# 	tmux send-keys -t "$id" nvim \ . Enter
+		# 	tmux split-window -v -t "$id" -c "$workdir" -l 1 "while true; do clear && busted; read; done"
+		# 	;;
+		# "lua2mc")
+		#  	tmux new-session -ds "$id" -c "$HOME/git/lua2mc"
+		# 	;;
+		# "ecal")
+		#  	tmux new-session -ds "$id" -c "$HOME/uni/Ecuaciones Algebraicas/"
+		# 	;;
+		# "ia")
+		#  	tmux new-session -ds "$id" -c "$HOME/uni/Inteligencia artificial/"
+		# 	;;
+		# "redes")
+		#  	tmux new-session -ds "$id" -c "$HOME/uni/Redes/"
+		# 	;;
+		# "so")
+		#  	tmux new-session -ds "$id" -c "$HOME/uni/Sistemas operativos/"
+		# 	;;
+		"pcomp"|"ucppm")
 			tmux new-session -ds "$id" -c "$HOME/pcomp/"
-			;;
-		*)
-			echo "Couldn't find a recipe for $id"
-			setup_default $id
-			;;
+		# 	;;
+		# *)
+		# 	echo "Couldn't find a recipe for $id"
+		# 	setup_default $id
+		# 	;;
 	esac
 }
 setup_subject(){
