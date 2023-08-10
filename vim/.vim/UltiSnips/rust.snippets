@@ -1,0 +1,38 @@
+snippet cp "Rust Competitive Programming template" i
+#[allow(unused_imports)]
+use std::cmp::{min,max};
+#[allow(unused_imports)]
+use std::io::{stdin,stdout,Write,BufWriter};
+
+#[derive(Default)]
+struct Scanner {
+    buffer: Vec<String>,
+    line: String
+}
+impl Scanner {
+    fn has_next(&mut self) -> bool {
+        if self.buffer.is_empty() {
+            match stdin().read_line(&mut self.line) {
+                Ok(0) => return false,
+                Ok(_) => self.buffer = self.line.split_whitespace().rev().map(String::from).collect(),
+                _ => panic!("Failed read"),
+            }
+        }
+        true
+    }
+    fn next<T: std::str::FromStr>(&mut self) -> T {
+        loop {
+            if let Some(token) = self.buffer.pop() {
+                return token.parse().ok().expect("Failed parse");
+            }
+            stdin().read_line(&mut self.line).expect("Failed read");
+            self.buffer = self.line.split_whitespace().rev().map(String::from).collect();
+            self.line.clear()
+        }
+    }
+}
+fn main() {
+    let mut scanner = Scanner::default();
+    $0
+}
+endsnippet
