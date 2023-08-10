@@ -16,6 +16,18 @@ endsnippet
 snippet repl "Insert a Read-Eval-Print-Loop"
 # REPL START
 from code import interact
-interact(local=locals())
+interact(local=dict(globals(),**locals()))
 # REPL END
+endsnippet
+
+snippet Scene "Create a manim Scene" i
+from manim import *
+class ${1:MyScene}(Scene):
+    def construct(self):
+        $0
+endsnippet
+
+snippet ioio "description"
+io is not None or exit(1)
+$0
 endsnippet
