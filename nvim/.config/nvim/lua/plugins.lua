@@ -78,7 +78,7 @@ require'packer'.startup(function(use)
 	use{'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
 	use 'nvim-treesitter/playground'
 	-- }}}3
-	-- Lips like languages {{{2
+	-- Lisp like languages {{{2
 	use{'bhurlow/vim-parinfer', ft={'lisp','yuck','scheme','clojure'}}
 	use{'elkowar/yuck.vim',     ft='yuck'}
 	-- }}}2
